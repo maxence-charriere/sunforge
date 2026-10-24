@@ -8,16 +8,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestExpire(t *testing.T) {
-	testCache(t, &Expire{
+func TestExpiringCache(t *testing.T) {
+	testCache(t, &ExpiringCache{
 		ItemTTL: time.Minute,
 	})
 }
 
-func TestExpireExpire(t *testing.T) {
+func TestExpiringCacheExpiration(t *testing.T) {
 	ctx := context.TODO()
 
-	c := Expire{
+	c := ExpiringCache{
 		ItemTTL: time.Minute,
 	}
 
@@ -38,10 +38,10 @@ func TestExpireExpire(t *testing.T) {
 	require.Len(t, c.queue, 2)
 }
 
-func TestExpireSetSameKey(t *testing.T) {
+func TestExpiringCacheSetSameKey(t *testing.T) {
 	ctx := context.TODO()
 
-	c := Expire{
+	c := ExpiringCache{
 		ItemTTL: time.Minute,
 	}
 
@@ -62,9 +62,9 @@ func TestExpireSetSameKey(t *testing.T) {
 	require.Len(t, c.items, 2)
 }
 
-func TestExpireNilValue(t *testing.T) {
+func TestExpiringCacheNilValue(t *testing.T) {
 	ctx := context.Background()
-	c := Expire{ItemTTL: time.Minute}
+	c := ExpiringCache{ItemTTL: time.Minute}
 	c.Set(ctx, "nil", nil)
 	c.Set(ctx, "other", "value")
 
@@ -84,9 +84,9 @@ func TestExpireNilValue(t *testing.T) {
 	require.Equal(t, "value", value)
 }
 
-func TestExpireOverwriteNilValue(t *testing.T) {
+func TestExpiringCacheOverwriteNilValue(t *testing.T) {
 	ctx := context.Background()
-	c := Expire{ItemTTL: time.Minute}
+	c := ExpiringCache{ItemTTL: time.Minute}
 	c.Set(ctx, "first", true)
 	c.Set(ctx, "key", nil)
 	c.Set(ctx, "key", "replacement")

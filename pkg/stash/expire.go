@@ -6,17 +6,18 @@ import (
 	"time"
 )
 
-type Expire struct {
+// ExpiringCache stores values in memory with a shared time-to-live.
+type ExpiringCache struct {
 	// The duration while an item is cached.
 	ItemTTL time.Duration
 
 	once  sync.Once
 	mutex sync.RWMutex
-	items map[string]*memItem
-	queue []*memItem
+	items map[string]*item
+	queue []*item
 }
 
-func (c *Expire) Get(ctx context.Context, key string) (any, bool) {
+func (c *ExpiringCache) Get(ctx context.Context, key string) (any, bool) {
 	c.once.Do(c.init)
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -28,7 +29,7 @@ func (c *Expire) Get(ctx context.Context, key string) (any, bool) {
 	return i.value, true
 }
 
-func (c *Expire) Set(ctx context.Context, key string, i any) {
+func (c *ExpiringCache) Set(ctx context.Context, key string, i any) {
 	c.once.Do(c.init)
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -38,14 +39,14 @@ func (c *Expire) Set(ctx context.Context, key string, i any) {
 	}
 
 	c.expire()
-	c.add(&memItem{
+	c.add(&item{
 		key:       key,
 		expiresAt: time.Now().Add(c.ItemTTL),
 		value:     i,
 	})
 }
 
-func (c *Expire) Del(ctx context.Context, key string) {
+func (c *ExpiringCache) Del(ctx context.Context, key string) {
 	c.once.Do(c.init)
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -56,16 +57,16 @@ func (c *Expire) Del(ctx context.Context, key string) {
 	}
 }
 
-func (c *Expire) init() {
-	c.items = make(map[string]*memItem)
+func (c *ExpiringCache) init() {
+	c.items = make(map[string]*item)
 }
 
-func (c *Expire) add(i *memItem) {
+func (c *ExpiringCache) add(i *item) {
 	c.items[i.key] = i
 	c.queue = append(c.queue, i)
 }
 
-func (c *Expire) del(i *memItem) {
+func (c *ExpiringCache) del(i *item) {
 	if !i.deleted {
 		delete(c.items, i.key)
 		i.value = nil
@@ -73,7 +74,7 @@ func (c *Expire) del(i *memItem) {
 	}
 }
 
-func (c *Expire) expire() {
+func (c *ExpiringCache) expire() {
 	now := time.Now()
 
 	i := 0
@@ -86,13 +87,13 @@ func (c *Expire) expire() {
 	c.queue = c.queue[:len(c.queue)-i]
 }
 
-type memItem struct {
+type item struct {
 	key       string
 	expiresAt time.Time
 	value     any
 	deleted   bool
 }
 
-func (i *memItem) isExpired(now time.Time) bool {
+func (i *item) isExpired(now time.Time) bool {
 	return i.deleted || i.expiresAt.Before(now)
 }

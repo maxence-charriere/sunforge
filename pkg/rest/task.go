@@ -191,7 +191,7 @@ type LocalTaskScheduler struct {
 
 func (s *LocalTaskScheduler) init() {
 	if s.Cache == nil {
-		s.Cache = &stash.Expire{ItemTTL: time.Hour}
+		s.Cache = &stash.ExpiringCache{ItemTTL: time.Hour}
 	}
 
 	if s.WorkerCount < 1 {
