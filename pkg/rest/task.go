@@ -19,7 +19,7 @@ import (
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 	"github.com/maxence-charriere/go-app/v11/pkg/errors"
 	"github.com/maxence-charriere/go-app/v11/pkg/logs"
-	"github.com/maxence-charriere/sunforge/pkg/cache"
+	"github.com/maxence-charriere/sunforge/pkg/stash"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -161,7 +161,7 @@ func WeeklyTask() string {
 // worker pool.
 type LocalTaskScheduler struct {
 	// Cache is used to deduplicate tasks.
-	Cache cache.Cache
+	Cache stash.Cache
 
 	// Transport is used for task HTTP requests.
 	Transport http.RoundTripper
@@ -191,7 +191,7 @@ type LocalTaskScheduler struct {
 
 func (s *LocalTaskScheduler) init() {
 	if s.Cache == nil {
-		s.Cache = &cache.Expire{ItemTTL: time.Hour}
+		s.Cache = &stash.Expire{ItemTTL: time.Hour}
 	}
 
 	if s.WorkerCount < 1 {
@@ -369,7 +369,7 @@ func (s *LocalTaskScheduler) shouldExecute(ctx context.Context, taskID, path str
 		return false
 	}
 
-	s.Cache.Set(ctx, taskID, cache.Int(1))
+	s.Cache.Set(ctx, taskID, stash.Int(1))
 	return true
 }
 

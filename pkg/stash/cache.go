@@ -1,4 +1,4 @@
-package cache
+package stash
 
 import (
 	"context"
