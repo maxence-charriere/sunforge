@@ -21,24 +21,20 @@ func TestExpireExpire(t *testing.T) {
 		ItemTTL: time.Minute,
 	}
 
-	c.Set(ctx, "/hello", String("hello"))
-	require.Equal(t, 1, c.Len())
-	require.Equal(t, 5, c.Size())
+	c.Set(ctx, "/hello", "hello")
+	require.Len(t, c.items, 1)
 
-	c.Set(ctx, "/world", String("world"))
-	require.Equal(t, 2, c.Len())
-	require.Equal(t, 10, c.Size())
+	c.Set(ctx, "/world", "world")
+	require.Len(t, c.items, 2)
 
-	c.Set(ctx, "/goodbye", String("goodbye"))
-	require.Equal(t, 3, c.Len())
-	require.Equal(t, 17, c.Size())
+	c.Set(ctx, "/goodbye", "goodbye")
+	require.Len(t, c.items, 3)
 
 	c.items["/hello"].expiresAt = time.Now().Add(-time.Second)
 	c.items["/world"].expiresAt = time.Now().Add(-time.Second)
 
-	c.Set(ctx, "/goodmorning", String("goodmorning"))
-	require.Equal(t, 2, c.Len())
-	require.Equal(t, 18, c.Size())
+	c.Set(ctx, "/goodmorning", "goodmorning")
+	require.Len(t, c.items, 2)
 	require.Len(t, c.queue, 2)
 }
 
@@ -49,23 +45,61 @@ func TestExpireSetSameKey(t *testing.T) {
 		ItemTTL: time.Minute,
 	}
 
-	c.Set(ctx, "/foo", String("foo"))
+	c.Set(ctx, "/foo", "foo")
 	require.Len(t, c.queue, 1)
-	require.Equal(t, 1, c.Len())
-	require.Equal(t, 3, c.Size())
+	require.Len(t, c.items, 1)
 
-	c.Set(ctx, "/bar", String("bar"))
+	c.Set(ctx, "/bar", "bar")
 	require.Len(t, c.queue, 2)
-	require.Equal(t, 2, c.Len())
-	require.Equal(t, 6, c.Size())
+	require.Len(t, c.items, 2)
 
-	c.Set(ctx, "/bar", String("barre"))
+	c.Set(ctx, "/bar", "barre")
 	require.Len(t, c.queue, 3)
-	require.Equal(t, 2, c.Len())
-	require.Equal(t, 8, c.Size())
+	require.Len(t, c.items, 2)
 
-	c.Set(ctx, "/foo", String("fooo"))
+	c.Set(ctx, "/foo", "fooo")
 	require.Len(t, c.queue, 2)
-	require.Equal(t, 2, c.Len())
-	require.Equal(t, 9, c.Size())
+	require.Len(t, c.items, 2)
+}
+
+func TestExpireNilValue(t *testing.T) {
+	ctx := context.Background()
+	c := Expire{ItemTTL: time.Minute}
+	c.Set(ctx, "nil", nil)
+	c.Set(ctx, "other", "value")
+
+	value, ok := c.Get(ctx, "nil")
+	require.True(t, ok)
+	require.Nil(t, value)
+
+	c.items["nil"].expiresAt = time.Now().Add(-time.Second)
+	value, ok = c.Get(ctx, "nil")
+	require.False(t, ok)
+	require.Nil(t, value)
+
+	c.Set(ctx, "trigger", true)
+	require.NotContains(t, c.items, "nil")
+	value, ok = c.Get(ctx, "other")
+	require.True(t, ok)
+	require.Equal(t, "value", value)
+}
+
+func TestExpireOverwriteNilValue(t *testing.T) {
+	ctx := context.Background()
+	c := Expire{ItemTTL: time.Minute}
+	c.Set(ctx, "first", true)
+	c.Set(ctx, "key", nil)
+	c.Set(ctx, "key", "replacement")
+
+	// Cleaning up the old entry must preserve its replacement.
+	c.Del(ctx, "first")
+	value, ok := c.Get(ctx, "key")
+	require.True(t, ok)
+	require.Equal(t, "replacement", value)
+
+	c.Set(ctx, "key", nil)
+	c.Del(ctx, "key")
+	value, ok = c.Get(ctx, "key")
+	require.False(t, ok)
+	require.Nil(t, value)
 }

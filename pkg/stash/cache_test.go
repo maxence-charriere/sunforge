@@ -3,75 +3,44 @@ package stash
 import (
 	"context"
 	"testing"
-	"unsafe"
 
 	"github.com/stretchr/testify/require"
 )
 
 func testCache(t *testing.T, c Cache) {
-	ctx := context.TODO()
+	t.Helper()
+	ctx := context.Background()
 
-	_, isCached := c.Get(ctx, "/foo")
-	require.False(t, isCached)
-	require.Zero(t, c.Len())
-	require.Zero(t, c.Size())
+	value, ok := c.Get(ctx, "missing")
+	require.False(t, ok)
+	require.Nil(t, value)
+	c.Del(ctx, "missing")
 
-	c.Set(ctx, "/foo", Bytes("foo"))
-	require.Equal(t, 1, c.Len())
-	require.Equal(t, 3, c.Size())
-
-	c.Set(ctx, "/bar", String("bar"))
-	require.Equal(t, 2, c.Len())
-	require.Equal(t, 6, c.Size())
-
-	foo, isCached := c.Get(ctx, "/foo")
-	require.True(t, isCached)
-	require.Equal(t, Bytes("foo"), foo.(Bytes))
-
-	bar, isCached := c.Get(ctx, "/bar")
-	require.True(t, isCached)
-	require.Equal(t, String("bar"), bar.(String))
-
-	c.Del(ctx, "/foo")
-	require.Equal(t, 1, c.Len())
-	require.Equal(t, 3, c.Size())
-
-	foo, isCached = c.Get(ctx, "/foo")
-	require.False(t, isCached)
-	require.Nil(t, foo)
-}
-
-func TestItemSize(t *testing.T) {
-	utests := []struct {
-		scenario     string
-		item         Item
-		expectedSize int
+	values := []struct {
+		name  string
+		value any
 	}{
-		{
-			scenario:     "bytes",
-			item:         Bytes("boo"),
-			expectedSize: 3,
-		},
-		{
-			scenario:     "string",
-			item:         String("hello"),
-			expectedSize: 5,
-		},
-		{
-			scenario:     "int",
-			item:         Int(42),
-			expectedSize: int(unsafe.Sizeof(42)),
-		},
-		{
-			scenario:     "float",
-			item:         Float(42.0),
-			expectedSize: int(unsafe.Sizeof(42.1)),
-		},
+		{"bytes", []byte("foo")},
+		{"string", "bar"},
+		{"int", 42},
+		{"float", 42.5},
+		{"struct", struct{ Name string }{Name: "sunforge"}},
+		{"nil", nil},
 	}
 
-	for _, u := range utests {
-		t.Run(u.scenario, func(t *testing.T) {
-			require.Equal(t, u.expectedSize, u.item.Size())
+	for _, entry := range values {
+		c.Set(ctx, entry.name, entry.value)
+	}
+	for _, entry := range values {
+		t.Run(entry.name, func(t *testing.T) {
+			value, ok := c.Get(ctx, entry.name)
+			require.True(t, ok)
+			require.Equal(t, entry.value, value)
+
+			c.Del(ctx, entry.name)
+			value, ok = c.Get(ctx, entry.name)
+			require.False(t, ok)
+			require.Nil(t, value)
 		})
 	}
 }

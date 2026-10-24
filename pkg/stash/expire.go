@@ -12,12 +12,11 @@ type Expire struct {
 
 	once  sync.Once
 	mutex sync.RWMutex
-	size  int
 	items map[string]*memItem
 	queue []*memItem
 }
 
-func (c *Expire) Get(ctx context.Context, key string) (Item, bool) {
+func (c *Expire) Get(ctx context.Context, key string) (any, bool) {
 	c.once.Do(c.init)
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -29,7 +28,7 @@ func (c *Expire) Get(ctx context.Context, key string) (Item, bool) {
 	return i.value, true
 }
 
-func (c *Expire) Set(ctx context.Context, key string, i Item) {
+func (c *Expire) Set(ctx context.Context, key string, i any) {
 	c.once.Do(c.init)
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -57,18 +56,6 @@ func (c *Expire) Del(ctx context.Context, key string) {
 	}
 }
 
-func (c *Expire) Len() int {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	return len(c.items)
-}
-
-func (c *Expire) Size() int {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	return c.size
-}
-
 func (c *Expire) init() {
 	c.items = make(map[string]*memItem)
 }
@@ -76,14 +63,13 @@ func (c *Expire) init() {
 func (c *Expire) add(i *memItem) {
 	c.items[i.key] = i
 	c.queue = append(c.queue, i)
-	c.size += i.value.Size()
 }
 
 func (c *Expire) del(i *memItem) {
-	if i.value != nil {
+	if !i.deleted {
 		delete(c.items, i.key)
-		c.size -= i.value.Size()
 		i.value = nil
+		i.deleted = true
 	}
 }
 
@@ -103,9 +89,10 @@ func (c *Expire) expire() {
 type memItem struct {
 	key       string
 	expiresAt time.Time
-	value     Item
+	value     any
+	deleted   bool
 }
 
 func (i *memItem) isExpired(now time.Time) bool {
-	return i.value == nil || i.expiresAt.Before(now)
+	return i.deleted || i.expiresAt.Before(now)
 }

@@ -369,7 +369,7 @@ func (s *LocalTaskScheduler) shouldExecute(ctx context.Context, taskID, path str
 		return false
 	}
 
-	s.Cache.Set(ctx, taskID, stash.Int(1))
+	s.Cache.Set(ctx, taskID, 1)
 	return true
 }
 
