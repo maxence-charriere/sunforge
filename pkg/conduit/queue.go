@@ -1,4 +1,4 @@
-package rest
+package conduit
 
 import "sync"
 
