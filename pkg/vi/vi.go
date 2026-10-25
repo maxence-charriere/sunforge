@@ -1,6 +1,3 @@
-//go:generate go run gen.go
-//go:generate go fmt
-
 // Package vi provides reusable UI components and styles for go-app applications.
 // It includes components for page layouts, navigation, media, and loading states.
 package vi
