@@ -20,6 +20,7 @@ go get github.com/maxence-charriere/sunforge
 | --- | --- |
 | [`vi`](./pkg/vi) | UI components and styles for go-app applications. |
 | [`conduit`](./pkg/conduit) | HTTP services and clients, authentication, rate limiting, and task scheduling. |
+| [`portal`](./pkg/portal) | OAuth and API clients for Google, Twitch, YouTube, X, LinkedIn, Threads, and Patreon. |
 | [`stash`](./pkg/stash) | Caching with configurable expiration. |
 
 ## Development
