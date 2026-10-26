@@ -11,25 +11,25 @@ import (
 	"golang.org/x/oauth2/linkedin"
 )
 
-type LinkedInClient struct {
+type LinkedIn struct {
 	*conduit.OAuthClient
 }
 
-func MakeLinkedInClient(c *conduit.OAuthClient) LinkedInClient {
+func MakeLinkedIn(c *conduit.OAuthClient) LinkedIn {
 	c.Endpoint = linkedin.Endpoint
-	return LinkedInClient{OAuthClient: c}
+	return LinkedIn{OAuthClient: c}
 }
 
-func (c LinkedInClient) AuthAsUser(ctx context.Context, code string) (LinkedInClient, error) {
+func (c LinkedIn) AuthAsUser(ctx context.Context, code string) (LinkedIn, error) {
 	userClient, err := c.OAuthClient.AuthAsUser(ctx, code)
 	if err != nil {
-		return LinkedInClient{}, err
+		return LinkedIn{}, err
 	}
-	return LinkedInClient{OAuthClient: userClient}, nil
+	return LinkedIn{OAuthClient: userClient}, nil
 }
 
-func (c LinkedInClient) AuthWithAccessToken(accessToken string, expiresAt time.Time) LinkedInClient {
-	return LinkedInClient{OAuthClient: c.OAuthClient.AuthWithAccessToken(accessToken, expiresAt)}
+func (c LinkedIn) AuthWithAccessToken(accessToken string, expiresAt time.Time) LinkedIn {
+	return LinkedIn{OAuthClient: c.OAuthClient.AuthWithAccessToken(accessToken, expiresAt)}
 }
 
 type LinkedInMemberDetails struct {
@@ -42,7 +42,7 @@ type LinkedInMemberDetails struct {
 	EmailVerified bool   `json:"email_verified"`
 }
 
-func (c LinkedInClient) MemberDetails(ctx context.Context) (LinkedInMemberDetails, error) {
+func (c LinkedIn) MemberDetails(ctx context.Context) (LinkedInMemberDetails, error) {
 	var member LinkedInMemberDetails
 	if err := c.Get(ctx, "https://api.linkedin.com/v2/userinfo", &member); err != nil {
 		return LinkedInMemberDetails{}, err
@@ -81,7 +81,7 @@ type LinkedInUgcMedia struct {
 	Title       LinkedInUgcText `json:"title,omitempty"`
 }
 
-func (c LinkedInClient) UgcPosts(ctx context.Context, q LinkedInUgcPostsQuery) error {
+func (c LinkedIn) UgcPosts(ctx context.Context, q LinkedInUgcPostsQuery) error {
 	body, err := c.Encode(q)
 	if err != nil {
 		return errors.New("encoding body failed").Wrap(err)

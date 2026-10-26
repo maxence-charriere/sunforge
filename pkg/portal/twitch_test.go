@@ -57,7 +57,7 @@ func TestTwitchStream(t *testing.T) {
 		},
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
-			client := MakeTwitchClient(&conduit.OAuthClient{
+			client := MakeTwitch(&conduit.OAuthClient{
 				ClientID: "client-id",
 				Token: &oauth2.Token{
 					AccessToken: "access-token",

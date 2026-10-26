@@ -8,26 +8,26 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type ThreadsClient struct {
+type Threads struct {
 	*conduit.OAuthClient
 }
 
-func MakeThreadsClient(c *conduit.OAuthClient) ThreadsClient {
+func MakeThreads(c *conduit.OAuthClient) Threads {
 	c.Endpoint = oauth2.Endpoint{
 		AuthURL:  "https://threads.net/oauth/authorize",
 		TokenURL: "https://graph.threads.net/oauth/access_token",
 	}
-	return ThreadsClient{OAuthClient: c}
+	return Threads{OAuthClient: c}
 }
 
-func (c ThreadsClient) AuthAsUser(ctx context.Context, code string) (ThreadsClient, error) {
+func (c Threads) AuthAsUser(ctx context.Context, code string) (Threads, error) {
 	userClient, err := c.OAuthClient.AuthAsUser(ctx, code)
 	if err != nil {
-		return ThreadsClient{}, err
+		return Threads{}, err
 	}
-	return ThreadsClient{OAuthClient: userClient}, nil
+	return Threads{OAuthClient: userClient}, nil
 }
 
-func (c ThreadsClient) AuthWithAccessToken(accessToken string, expiresAt time.Time) ThreadsClient {
-	return ThreadsClient{OAuthClient: c.OAuthClient.AuthWithAccessToken(accessToken, expiresAt)}
+func (c Threads) AuthWithAccessToken(accessToken string, expiresAt time.Time) Threads {
+	return Threads{OAuthClient: c.OAuthClient.AuthWithAccessToken(accessToken, expiresAt)}
 }

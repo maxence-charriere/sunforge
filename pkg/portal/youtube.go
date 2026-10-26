@@ -30,27 +30,27 @@ type YoutubeChannel struct {
 	} `json:"items"`
 }
 
-type YouTubeClient struct {
+type YouTube struct {
 	*conduit.OAuthClient
 }
 
-func MakeYouTubeClient(c *conduit.OAuthClient) YouTubeClient {
+func MakeYouTube(c *conduit.OAuthClient) YouTube {
 	c.Endpoint = google.Endpoint
-	return YouTubeClient{OAuthClient: c}
+	return YouTube{OAuthClient: c}
 }
 
-func (c YouTubeClient) AuthAsUser(ctx context.Context, code string) (YouTubeClient, error) {
+func (c YouTube) AuthAsUser(ctx context.Context, code string) (YouTube, error) {
 	userClient, err := c.OAuthClient.AuthAsUser(ctx, code, conduit.OAuthOption{
 		Key: "pcke_code_challenge",
 	})
 	if err != nil {
-		return YouTubeClient{}, err
+		return YouTube{}, err
 	}
 
-	return YouTubeClient{OAuthClient: userClient}, nil
+	return YouTube{OAuthClient: userClient}, nil
 }
 
-func (c YouTubeClient) GetCurrentUserChannel(ctx context.Context) (YoutubeChannel, error) {
+func (c YouTube) GetCurrentUserChannel(ctx context.Context) (YoutubeChannel, error) {
 	var channel YoutubeChannel
 	err := c.Get(ctx, "https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", &channel)
 	return channel, err

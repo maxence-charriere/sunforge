@@ -84,7 +84,7 @@ func TestGoogleSignIn(t *testing.T) {
 				}, nil
 			})
 			ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Transport: transport})
-			client := MakeGoogleClient(&conduit.OAuthClient{
+			client := MakeGoogle(&conduit.OAuthClient{
 				ClientID:     "client-id",
 				ClientSecret: "client-secret",
 				RedirectURL:  "https://example.com/oauth/google",

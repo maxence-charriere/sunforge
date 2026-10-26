@@ -8,21 +8,21 @@ import (
 	"golang.org/x/oauth2/twitch"
 )
 
-type TwitchClient struct {
+type Twitch struct {
 	*conduit.OAuthClient
 }
 
-func MakeTwitchClient(c *conduit.OAuthClient) TwitchClient {
+func MakeTwitch(c *conduit.OAuthClient) Twitch {
 	c.Endpoint = twitch.Endpoint
-	return TwitchClient{OAuthClient: c}
+	return Twitch{OAuthClient: c}
 }
 
-func (c TwitchClient) AuthAsUser(ctx context.Context, code string) (TwitchClient, error) {
+func (c Twitch) AuthAsUser(ctx context.Context, code string) (Twitch, error) {
 	userClient, err := c.OAuthClient.AuthAsUser(ctx, code)
 	if err != nil {
-		return TwitchClient{}, err
+		return Twitch{}, err
 	}
-	return TwitchClient{OAuthClient: userClient}, nil
+	return Twitch{OAuthClient: userClient}, nil
 }
 
 type TwitchStream struct {
@@ -42,7 +42,7 @@ type TwitchStream struct {
 	IsMature     bool     `json:"is_mature"`
 }
 
-func (c TwitchClient) Stream(ctx context.Context, url string) (TwitchStream, error) {
+func (c Twitch) Stream(ctx context.Context, url string) (TwitchStream, error) {
 	login := path.Base(url)
 	u := "https://api.twitch.tv/helix/streams?user_login=" + login
 
@@ -73,7 +73,7 @@ type TwitchUser struct {
 	OfflineImageURL string `json:"offline_image_url"`
 }
 
-func (c TwitchClient) GetUser(ctx context.Context) (TwitchUser, error) {
+func (c Twitch) GetUser(ctx context.Context) (TwitchUser, error) {
 	u := "https://api.twitch.tv/helix/users"
 	var s struct {
 		Data []TwitchUser `json:"data"`

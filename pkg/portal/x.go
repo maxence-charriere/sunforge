@@ -19,35 +19,35 @@ type XUser struct {
 	} `json:"data"`
 }
 
-type XClient struct {
+type X struct {
 	*conduit.OAuthClient
 }
 
-func MakeXClient(c *conduit.OAuthClient) XClient {
+func MakeX(c *conduit.OAuthClient) X {
 	c.Endpoint = oauth2.Endpoint{
 		AuthURL:  "https://x.com/i/oauth2/authorize",
 		TokenURL: "https://api.twitter.com/2/oauth2/token",
 	}
-	return XClient{OAuthClient: c}
+	return X{OAuthClient: c}
 }
 
-func (c XClient) AuthAsUser(ctx context.Context, code string, pckeCodeVerifier string) (XClient, error) {
+func (c X) AuthAsUser(ctx context.Context, code string, pckeCodeVerifier string) (X, error) {
 	userClient, err := c.OAuthClient.AuthAsUser(ctx, code, conduit.OAuthOption{
 		Key:   "pcke_code_challenge",
 		Value: pckeCodeVerifier,
 	})
 	if err != nil {
-		return XClient{}, err
+		return X{}, err
 	}
 
-	return XClient{OAuthClient: userClient}, nil
+	return X{OAuthClient: userClient}, nil
 }
 
-func (c XClient) AuthWithAccessToken(accessToken string, expiresAt time.Time) XClient {
-	return XClient{OAuthClient: c.OAuthClient.AuthWithAccessToken(accessToken, expiresAt)}
+func (c X) AuthWithAccessToken(accessToken string, expiresAt time.Time) X {
+	return X{OAuthClient: c.OAuthClient.AuthWithAccessToken(accessToken, expiresAt)}
 }
 
-func (c XClient) GetCurrentUser(ctx context.Context) (XUser, error) {
+func (c X) GetCurrentUser(ctx context.Context) (XUser, error) {
 	var user XUser
 	err := c.Get(ctx, "https://api.twitter.com/2/users/me", &user)
 	return user, err
@@ -57,7 +57,7 @@ type XPostQuery struct {
 	Text string `json:"text"`
 }
 
-func (c XClient) Post(ctx context.Context, q XPostQuery) error {
+func (c X) Post(ctx context.Context, q XPostQuery) error {
 	body, err := c.Encode(q)
 	if err != nil {
 		return errors.New("encoding body failed").Wrap(err)

@@ -213,36 +213,36 @@ func (r *patreonResource) UnmarshalJSON(d []byte) error {
 	return err
 }
 
-type PatreonClient struct {
+type Patreon struct {
 	*conduit.OAuthClient
 	WebhookSecret string
 }
 
-func MakePatreonClient(webhookSecret string, c *conduit.OAuthClient) PatreonClient {
+func MakePatreon(webhookSecret string, c *conduit.OAuthClient) Patreon {
 	c.Endpoint = oauth2.Endpoint{
 		AuthURL:  "https://www.patreon.com/api/oauth2/authorize",
 		TokenURL: "https://www.patreon.com/api/oauth2/token",
 	}
 
-	return PatreonClient{
+	return Patreon{
 		OAuthClient:   c,
 		WebhookSecret: webhookSecret,
 	}
 }
 
-func (c *PatreonClient) AuthAsUser(ctx context.Context, code string) (PatreonClient, error) {
+func (c *Patreon) AuthAsUser(ctx context.Context, code string) (Patreon, error) {
 	userClient, err := c.OAuthClient.AuthAsUser(ctx, code)
 	if err != nil {
-		return PatreonClient{}, err
+		return Patreon{}, err
 	}
 
-	return PatreonClient{
+	return Patreon{
 		WebhookSecret: c.WebhookSecret,
 		OAuthClient:   userClient,
 	}, nil
 }
 
-func (c PatreonClient) Identity(ctx context.Context) (PatreonIdentity, error) {
+func (c Patreon) Identity(ctx context.Context) (PatreonIdentity, error) {
 	url := fmt.Sprintf("https://www.patreon.com/api/oauth2/v2/identity?include=%s&%s&%s&%s",
 		url.QueryEscape(strings.Join([]string{
 			"campaign",
@@ -273,7 +273,7 @@ func (c PatreonClient) Identity(ctx context.Context) (PatreonIdentity, error) {
 	}, nil
 }
 
-func (c PatreonClient) ParseWebhookMember(v []byte) (PatreonWebhookMember, error) {
+func (c Patreon) ParseWebhookMember(v []byte) (PatreonWebhookMember, error) {
 	var res patreonResponse
 	if err := json.Unmarshal(v, &res); err != nil {
 		return PatreonWebhookMember{}, errors.New("decoding failed").Wrap(err)
