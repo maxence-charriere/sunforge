@@ -124,10 +124,28 @@ func (c *crucible) Render() app.UI {
 		Class(StyleFromBool("vi-crucible-with-ads", len(c.IAds) != 0)).
 		Class(c.IClass).
 		Body(
-			app.Div().Class("vi-crucible-pane"),
+			app.Nav().
+				Class("vi-crucible-pane").
+				Class("vi-unselectable").
+				Body(
+					app.A().
+						Class("vi-crucible-logo").
+						Href("/").
+						Body(
+							app.Img().
+								Altf("%s Logo", c.IName).
+								Src(c.IIcon),
+							app.Div().Text(c.IName),
+							app.Div().Text(c.IVersion),
+						),
+				),
+			app.Div().
+				Class("vi-crucible-content").
+				Body(c.IContent...),
 			app.Div().Class("vi-crucible-nav"),
-			app.Div().Class("vi-crucible-content"),
-			app.Div().Class("vi-crucible-ads"),
+			app.Div().
+				Class("vi-crucible-ads").
+				Body(c.IAds...),
 			app.Div().Class("vi-crucible-pop"),
 		)
 }

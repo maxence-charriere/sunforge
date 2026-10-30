@@ -339,7 +339,11 @@ button {
   --crucible_columns: 1fr;
 
   --crucible_nav_height: 30px;
-  --crucible_logo_height: 156px;
+  --crucible_logo_size: 90px;
+  --crucible_logo_title_size: 30px;
+  --crucible_logo_version_size: 10px;
+  --crucible_logo_text_transform: uppercase;
+  --crucible_logo_gap: 0;
 }
 
 .vi-crucible {
@@ -352,22 +356,33 @@ button {
 }
 
 .vi-crucible-pane {
-  background: navy;
   grid-column: 1 / span 1;
   grid-row: 1 / span 1;
+  align-self: center;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: var(--crucible_pane_display);
+
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
 }
 
 .vi-crucible-content {
-  background: white;
   grid-column: var(--crucible_content_columns);
   grid-row: 1 / span 1;
+  align-self: center;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .vi-crucible-ads {
-  background: red;
   grid-column: var(--crucible_ads_columns);
   grid-row: 1 / span 1;
+  align-self: center;
+  max-height: 100%;
+  overflow: hidden;
   display: var(--crucible_ads_display);
 }
 
@@ -384,7 +399,7 @@ button {
 @media (min-width: 1430px) {
   .vi-crucible.vi-crucible-without-ads {
     --crucible_columns: var(--crucible_pane_width) 1fr;
-    --crucible_pane_display: block;
+    --crucible_pane_display: grid;
     --crucible_content_columns: 2 / span 1;
   }
 }
@@ -393,11 +408,63 @@ button {
 @media (min-width: 1742px) {
   .vi-crucible.vi-crucible-with-ads {
     --crucible_columns: var(--crucible_pane_width) 1fr var(--crucible_ads_width);
-    --crucible_pane_display: block;
+    --crucible_pane_display: grid;
     --crucible_content_columns: 2 / span 1;
     --crucible_ads_columns: 3 / span 1;
     --crucible_ads_display: block;
   }
+}
+
+.vi-crucible-logo {
+  grid-column: 1 / span 2;
+  grid-row: 1 / span 1;
+  align-self: center;
+  justify-self: center;
+
+  display: grid;
+  grid-template-columns: var(--crucible_logo_size) auto;
+  grid-template-rows: auto auto;
+  font-family: var(--titles_font_family);
+  font-weight: var(--titles_font_weight);
+  text-transform: var(--crucible_logo_text_transform);
+  text-shadow: var(--title_shadow);
+  gap: var(--crucible_logo_gap);
+}
+
+.vi-crucible-logo:hover,
+.vi-crucible-logo:active {
+  color: var(--accent_color);
+}
+
+.vi-crucible-logo>img {
+  grid-column: 1 / span 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+
+  width: var(--crucible_logo_size);
+  height: var(--crucible_logo_size);
+}
+
+.vi-crucible-logo>div:first-of-type {
+  grid-column: 2 / span 1;
+  grid-row: 1 / span 1;
+  align-self: end;
+
+  font-size: var(--crucible_logo_title_size);
+  font-weight: var(--titles_font_weight);
+}
+
+.vi-crucible-logo>div:last-of-type {
+  grid-column: 2 / span 1;
+  grid-row: 2 / span 1;
+  align-self: start;
+
+  font-size: var(--crucible_logo_version_size);
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--accent_color);
 }
 
 /*
