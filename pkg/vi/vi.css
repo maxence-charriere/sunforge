@@ -330,11 +330,16 @@ button {
 */
 :root {
   --crucible_pane_width: 440px;
+  --crucible_pane_display: none;
+  --crucible_content_width: 1fr;
+  --crucible_content_columns: 1 / span 1;
   --crucible_ads_width: 312px;
+  --crucible_ads_columns: 2 /span 1;
   --crucible_ads_display: none;
+  --crucible_columns: 1fr;
+
   --crucible_nav_height: 30px;
   --crucible_logo_height: 156px;
-  --crucible_columns: var(--crucible_pane_width) 1fr;
 }
 
 .vi-crucible {
@@ -346,30 +351,54 @@ button {
   grid-template-rows: 1fr;
 }
 
-.vi-crucible.vi-crucible-with-ads {
-  --crucible_columns: var(--crucible_pane_width) 1fr var(--crucible_ads_width);
-  --crucible_ads_display: block;
-}
-
 .vi-crucible-pane {
   background: navy;
   grid-column: 1 / span 1;
-  grid-row: 1;
+  grid-row: 1 / span 1;
+  display: var(--crucible_pane_display);
 }
 
 .vi-crucible-content {
   background: white;
   grid-column: var(--crucible_content_columns);
-  grid-row: 1;
+  grid-row: 1 / span 1;
 }
 
 .vi-crucible-ads {
   background: red;
-  grid-column: 3 / span 1;
-  grid-row: 1;
+  grid-column: var(--crucible_ads_columns);
+  grid-row: 1 / span 1;
   display: var(--crucible_ads_display);
 }
 
+/* Crucible Content + Ads */
+@media (min-width: 1302px) {
+  .vi-crucible.vi-crucible-with-ads {
+    --crucible_columns: 1fr var(--crucible_ads_width);
+    --crucible_ads_columns: 2 /span 1;
+    --crucible_ads_display: block;
+  }
+}
+
+/* Crucible Pane + Content */
+@media (min-width: 1430px) {
+  .vi-crucible.vi-crucible-without-ads {
+    --crucible_columns: var(--crucible_pane_width) 1fr;
+    --crucible_pane_display: block;
+    --crucible_content_columns: 2 / span 1;
+  }
+}
+
+/* Crucible Pane + Content + Ads */
+@media (min-width: 1742px) {
+  .vi-crucible.vi-crucible-with-ads {
+    --crucible_columns: var(--crucible_pane_width) 1fr var(--crucible_ads_width);
+    --crucible_pane_display: block;
+    --crucible_content_columns: 2 / span 1;
+    --crucible_ads_columns: 3 / span 1;
+    --crucible_ads_display: block;
+  }
+}
 
 /*
 **

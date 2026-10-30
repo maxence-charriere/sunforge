@@ -120,6 +120,7 @@ func (c *crucible) Render() app.UI {
 	return app.Div().
 		ID(c.IID).
 		Class("vi-crucible").
+		Class(StyleFromBool("vi-crucible-without-ads", len(c.IAds) == 0)).
 		Class(StyleFromBool("vi-crucible-with-ads", len(c.IAds) != 0)).
 		Class(c.IClass).
 		Body(
