@@ -180,9 +180,11 @@ func (c *crucible) Render() app.UI {
 							SVGIcon(c.INotificationSVGIcon),
 					),
 				),
-			app.Div().
+			app.Aside().
 				Class("vi-crucible-ads").
-				Body(c.IAds...),
+				Body(
+					app.Div().Body(c.IAds...),
+				),
 			app.Div().
 				Class("vi-crucible-overlay").
 				OnClick(c.closeOverlay),

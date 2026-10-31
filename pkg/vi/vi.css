@@ -95,9 +95,22 @@ body {
   background-color: var(--scrollbar_thumb_color);
 }
 
+/*
+**
+** GoApp
+**
+*/
 .goapp-app-info {
-  color: var(--text_color);
   background: var(--background);
+  color: var(--text_color);
+  font-family: var(--titles_font_family);
+  font-weight: var(--titles_font_weight);
+  font-size: var(--body_font_size);
+  text-transform: uppercase;
+}
+
+.goapp-app-info>p {
+  margin: 9px 0 0 !important;
 }
 
 /*
@@ -329,6 +342,8 @@ button {
 **
 */
 :root {
+  --crucible_columns: 1fr;
+
   --crucible_pane_width: 440px;
   --crucible_pane_display: none;
   --crucible_pane_padding_h: 12px;
@@ -340,11 +355,12 @@ button {
   --crucible_content_columns: 1 / span 1;
   --crucible_content_padding_h: var(--crucible_pane_padding_h);
   --crucible_content_padding_w: var(--crucible_pane_padding_w);
-  --crucible_ads_width: 312px;
-  --crucible_ads_columns: 2 /span 1;
-  --crucible_ads_display: none;
-  --crucible_columns: 1fr;
 
+  --crucible_ads_width: 312px;
+  --crucible_ads_columns: 2 / span 1;
+  --crucible_ads_display: none;
+  --crucible_ads_video_height: 210px;
+  --crubible_ads_content_row: 1 / span 1;
   --crucible_overlay_zindex: 100000;
   --crucible_overlay_display: none;
   --crucible_overlay_background: linear-gradient(var(--background-color),
@@ -360,8 +376,8 @@ button {
 
   --crucible_nav_height: 48px;
   --crucible_nav_border_radius: 30px;
-  --crucible_nav_padding: 5px 24px;
-  --crucible_nav_gap: 24px;
+  --crucible_nav_padding: 5px 30px;
+  --crucible_nav_gap: 30px;
   --crucible_nav_background: var(--background-color);
   --crucible_nav_pane_button_display: block;
 }
@@ -424,11 +440,21 @@ button {
 .vi-crucible-ads {
   grid-column: var(--crucible_ads_columns);
   grid-row: 1 / span 2;
-  align-self: center;
+
   box-sizing: border-box;
   max-height: 100%;
+  padding: var(--crucible_content_padding_h) 0;
   overflow: hidden;
   display: var(--crucible_ads_display);
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr var(--crucible_ads_video_height);
+}
+
+.vi-crucible-ads>div {
+  align-self: center;
+  justify-self: center;
+  grid-column: 1 / span 1;
+  grid-row: var(--crubible_ads_content_row);
 }
 
 /* Crucible Content + Ads */
@@ -436,7 +462,7 @@ button {
   .vi-crucible.vi-crucible-with-ads {
     --crucible_columns: 1fr var(--crucible_ads_width);
     --crucible_ads_columns: 2 /span 1;
-    --crucible_ads_display: block;
+    --crucible_ads_display: grid;
   }
 }
 
@@ -462,11 +488,18 @@ button {
     --crucible_nav_pane_button_display: none;
     --crucible_content_columns: 2 / span 1;
     --crucible_ads_columns: 3 / span 1;
-    --crucible_ads_display: block;
+    --crucible_ads_display: grid;
   }
 
   .vi-crucible.vi-crucible-with-ads.vi-crucible-pane-popped {
     --crucible_pane_justify_self: start;
+  }
+}
+
+/* Crucible Ads Position */
+@media (min-height: 960px) {
+  :root {
+    --crubible_ads_content_row: 1 / span 2;
   }
 }
 
