@@ -1,6 +1,8 @@
 package vi
 
-import "github.com/maxence-charriere/go-app/v11/pkg/app"
+import (
+	"github.com/maxence-charriere/go-app/v11/pkg/app"
+)
 
 type Crucible interface {
 	app.Composer
@@ -22,7 +24,9 @@ type Crucible interface {
 }
 
 func NewCrucible() Crucible {
-	return &crucible{}
+	return &crucible{
+		INotificationSVGIcon: BellSVG,
+	}
 }
 
 type crucible struct {
@@ -43,7 +47,8 @@ type crucible struct {
 	INotificationSVGIcon string
 	INotificationsMark   bool
 
-	pop []app.UI
+	pop        []app.UI
+	panePopped bool
 }
 
 func (c *crucible) ID(v string) Crucible {
@@ -122,11 +127,13 @@ func (c *crucible) Render() app.UI {
 		Class("vi-crucible").
 		Class(StyleFromBool("vi-crucible-without-ads", len(c.IAds) == 0)).
 		Class(StyleFromBool("vi-crucible-with-ads", len(c.IAds) != 0)).
+		Class(StyleFromBool("vi-crucible-pane-popped", c.panePopped)).
 		Class(c.IClass).
 		Body(
 			app.Nav().
 				Class("vi-crucible-pane").
 				Class("vi-unselectable").
+				OnClick(c.closeOverlay).
 				Body(
 					app.A().
 						Class("vi-crucible-logo").
@@ -148,10 +155,44 @@ func (c *crucible) Render() app.UI {
 			app.Div().
 				Class("vi-crucible-content").
 				Body(c.IContent...),
-			app.Div().Class("vi-crucible-nav"),
+			app.Nav().
+				Class("vi-crucible-nav").
+				Body(
+					app.Ul().Body(
+						NewMediaObject().
+							InLi().
+							AsButton().
+							SVGIcon(MenuSVG).
+							OnClick(c.popPane),
+						app.Range(c.INav).
+							Slice(func(i int) app.UI {
+								return c.INav[i]
+							}),
+						NewMediaObject().
+							InLi().
+							AsButton().
+							SVGIcon(SendSVG).
+							OnClick(ShareCurrentURL).
+							Help("Share"),
+						NewMediaObject().
+							InLi().
+							AsButton().
+							SVGIcon(c.INotificationSVGIcon),
+					),
+				),
 			app.Div().
 				Class("vi-crucible-ads").
 				Body(c.IAds...),
-			app.Div().Class("vi-crucible-pop"),
+			app.Div().
+				Class("vi-crucible-overlay").
+				OnClick(c.closeOverlay),
 		)
+}
+
+func (c *crucible) popPane(ctx app.Context, e app.Event) {
+	c.panePopped = true
+}
+
+func (c *crucible) closeOverlay(ctx app.Context, e app.Event) {
+	c.panePopped = false
 }
