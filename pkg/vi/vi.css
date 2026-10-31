@@ -331,6 +331,8 @@ button {
 :root {
   --crucible_pane_width: 440px;
   --crucible_pane_display: none;
+  --crucible_pane_padding_h: 12px;
+  --crucible_pane_padding_w: 30px;
   --crucible_content_width: 1fr;
   --crucible_content_columns: 1 / span 1;
   --crucible_ads_width: 312px;
@@ -339,11 +341,15 @@ button {
   --crucible_columns: 1fr;
 
   --crucible_nav_height: 30px;
+
   --crucible_logo_size: 90px;
   --crucible_logo_title_size: 30px;
   --crucible_logo_version_size: 10px;
   --crucible_logo_text_transform: uppercase;
   --crucible_logo_gap: 0;
+  --crucible_menu_section_padding: 36px 0 4px;
+  --crucible_menu_item_padding: 2px 0;
+
 }
 
 .vi-crucible {
@@ -359,7 +365,9 @@ button {
   grid-column: 1 / span 1;
   grid-row: 1 / span 1;
   align-self: center;
+  box-sizing: border-box;
   max-height: 100%;
+  padding: var(--crucible_pane_padding_h) 0;
   overflow-x: hidden;
   overflow-y: auto;
   display: var(--crucible_pane_display);
@@ -372,6 +380,7 @@ button {
   grid-column: var(--crucible_content_columns);
   grid-row: 1 / span 1;
   align-self: center;
+  box-sizing: border-box;
   max-height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
@@ -381,6 +390,7 @@ button {
   grid-column: var(--crucible_ads_columns);
   grid-row: 1 / span 1;
   align-self: center;
+  box-sizing: border-box;
   max-height: 100%;
   overflow: hidden;
   display: var(--crucible_ads_display);
@@ -424,6 +434,7 @@ button {
   display: grid;
   grid-template-columns: var(--crucible_logo_size) auto;
   grid-template-rows: auto auto;
+  padding: 0 var(--crucible_pane_padding_w);
   font-family: var(--titles_font_family);
   font-weight: var(--titles_font_weight);
   text-transform: var(--crucible_logo_text_transform);
@@ -466,6 +477,38 @@ button {
   text-overflow: ellipsis;
   color: var(--accent_color);
 }
+
+.vi-crucible-menu {
+  grid-column: 1 / span 1;
+  grid-row: 2 / span 1;
+  padding: 0 var(--crucible_pane_padding_w);
+}
+
+.vi-crucible-index {
+  grid-column: 2 / span 1;
+  grid-row: 2 / span 1;
+  padding: 0 var(--crucible_pane_padding_w);
+}
+
+.vi-crucible-pane h2 {
+  font-size: var(--h3);
+  border: 0;
+  margin: 0;
+  padding: var(--crucible_menu_section_padding);
+}
+
+.vi-crucible-pane ul,
+.vi-crucible-pane ol {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.vi-crucible-pane li {
+  padding: var(--crucible_menu_item_padding);
+  margin: 0;
+}
+
 
 /*
 **

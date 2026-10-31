@@ -138,6 +138,12 @@ func (c *crucible) Render() app.UI {
 							app.Div().Text(c.IName),
 							app.Div().Text(c.IVersion),
 						),
+					app.Div().
+						Class("vi-crucible-menu").
+						Body(c.IMenu...),
+					app.Div().
+						Class("vi-crucible-index").
+						Body(c.IIndex...),
 				),
 			app.Div().
 				Class("vi-crucible-content").
