@@ -346,15 +346,13 @@ button {
 
   --crucible_pane_width: 440px;
   --crucible_pane_display: none;
-  --crucible_pane_padding_h: 12px;
-  --crucible_pane_padding_w: 30px;
   --crucible_pane_justify_self: start;
   --crucible_pane_zindex: auto;
 
   --crucible_content_width: 1fr;
   --crucible_content_columns: 1 / span 1;
-  --crucible_content_padding_h: var(--crucible_pane_padding_h);
-  --crucible_content_padding_w: var(--crucible_pane_padding_w);
+  --crucible_content_padding_h: 12px;
+  --crucible_content_padding_w: 30px;
 
   --crucible_ads_width: 312px;
   --crucible_ads_columns: 2 / span 1;
@@ -422,7 +420,7 @@ button {
   box-sizing: border-box;
   max-width: var(--crucible_pane_width);
   max-height: 100%;
-  padding: var(--crucible_pane_padding_h) 0;
+  padding: var(--crucible_content_padding_h) 0;
   display: var(--crucible_pane_display);
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto var(--crucible_nav_height);
@@ -520,7 +518,7 @@ button {
   display: grid;
   grid-template-columns: var(--crucible_logo_size) auto;
   grid-template-rows: auto auto;
-  padding: 0 var(--crucible_pane_padding_w);
+  padding: 0 var(--crucible_content_padding_w);
   font-family: var(--titles_font_family);
   font-weight: var(--titles_font_weight);
   text-transform: var(--crucible_logo_text_transform);
@@ -567,13 +565,13 @@ button {
 .vi-crucible-menu {
   grid-column: 1 / span 1;
   grid-row: 2 / span 1;
-  padding: 0 var(--crucible_pane_padding_w);
+  padding: 0 var(--crucible_content_padding_w);
 }
 
 .vi-crucible-index {
   grid-column: 2 / span 1;
   grid-row: 2 / span 1;
-  padding: 0 var(--crucible_pane_padding_w);
+  padding: 0 var(--crucible_content_padding_w);
 }
 
 .vi-crucible-pane h2 {
