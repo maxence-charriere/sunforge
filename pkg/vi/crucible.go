@@ -131,6 +131,8 @@ func (c *crucible) OnMount(ctx app.Context) {
 	ctx.Handle(showPop, c.handleShowPop)
 	ctx.Handle(hidePop, c.handleHidePop)
 	ctx.Handle(closePop, c.handleClosePop)
+
+	c.OnAppInstallChange(ctx)
 }
 
 func (c *crucible) OnNav(ctx app.Context) {
