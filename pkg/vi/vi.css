@@ -381,6 +381,10 @@ button {
   --crucible_nav_background: var(--background-color);
   --crucible_nav_pane_button_display: block;
 
+  --crucible_pop_display: none;
+  --crucible_pop_transition: transform 100ms linear;
+  --crucible_pop_gap: 6px;
+
   --crucible_notifications_badge_size: 12px;
   --crucible_notifications_display: none;
 }
@@ -406,7 +410,7 @@ button {
   --crucible_pane_display: grid;
   --crucible_pane_justify_self: center;
   --crucible_overlay_display: block;
-  --crucible_pane_zindex: calc(var(--crucible_overlay_zindex) + 1);
+  --crucible_pane_zindex: calc(var(--crucible_overlay_zindex) + 2);
 }
 
 .vi-crucible-pane {
@@ -614,6 +618,53 @@ button {
   display: var(--crucible_nav_pane_button_display);
 }
 
+.vi-crucible-pop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+
+  display: var(--crucible_pop_display);
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  pointer-events: none;
+  transition: var(--crucible_pop_transition);
+  z-index: calc(var(--crucible_overlay_zindex) + 1);
+  gap: var(--crucible_pop_gap);
+}
+
+.vi-crucible-pop-visible {
+  --crucible_pop_display: flex;
+}
+
+.vi-crucible-pop-fullscreen {
+  --crucible_overlay_display: block;
+  --crucible_pop_transition: none;
+}
+
+.vi-crucible-pop-fullscreen .vi-crucible-pop {
+  position: relative;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  align-self: center;
+  justify-self: center;
+
+  padding: var(--crucible_nav_height) var(--crucible_content_padding_w) var(--crucible_content_padding_h);
+  transform: none !important;
+  overflow-y: auto;
+  pointer-events: initial;
+}
+
+.vi-crucible-pop>* {
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: var(--crucible_pane_width);
+}
 
 .vi-crucible-notifications {
   grid-column: 1 / -1;
@@ -622,7 +673,7 @@ button {
   display: var(--crucible_notifications_display);
   grid-template-columns: 1fr minmax(0, var(--crucible_pane_width));
   grid-template-rows: 1fr;
-  z-index: calc(var(--crucible_overlay_zindex) + 1);
+  z-index: calc(var(--crucible_overlay_zindex) + 2);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -2596,6 +2647,16 @@ div[data-vi="svg"] {
   .vi-anime>img:not(:first-child) {
     display: none;
   }
+}
+
+/*
+**
+** Install PWA
+**
+*/
+.vi-install-pwa ol>li svg {
+  width: var(--body_font_size);
+  height: var(--body_font_size);
 }
 
 /*

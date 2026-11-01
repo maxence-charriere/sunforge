@@ -1,7 +1,14 @@
 package vi
 
 import (
+	"fmt"
+	"sync"
+
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
+)
+
+const (
+	crucibleContentOnlyWidth = 1302
 )
 
 type Crucible interface {
@@ -43,9 +50,16 @@ type crucible struct {
 	INotifications      []app.UI
 	INotificationsBadge bool
 
-	pop                  []app.UI
 	panePopped           bool
 	notificationsVisible bool
+	installVisible       bool
+	appleBrowser         bool
+
+	pop             []app.UI
+	popX            int
+	popY            int
+	fullscreenPop   bool
+	initPopPosition sync.Once
 }
 
 func (c *crucible) ID(v string) Crucible {
@@ -113,6 +127,20 @@ func (c *crucible) NotificationsBadge(v bool) Crucible {
 	return c
 }
 
+func (c *crucible) OnMount(ctx app.Context) {
+	ctx.Handle(showPop, c.handleShowPop)
+	ctx.Handle(hidePop, c.handleHidePop)
+	ctx.Handle(closePop, c.handleClosePop)
+}
+
+func (c *crucible) OnNav(ctx app.Context) {
+}
+
+func (c *crucible) OnAppInstallChange(ctx app.Context) {
+	c.installVisible = ctx.IsAppInstallable()
+	c.appleBrowser = ctx.IsAppleBrowser()
+}
+
 func (c *crucible) Render() app.UI {
 	return app.Div().
 		ID(c.IID).
@@ -120,6 +148,8 @@ func (c *crucible) Render() app.UI {
 		Class(StyleFromBool("vi-crucible-without-ads", len(c.IAds) == 0)).
 		Class(StyleFromBool("vi-crucible-with-ads", len(c.IAds) != 0)).
 		Class(StyleFromBool("vi-crucible-pane-popped", c.panePopped)).
+		Class(StyleFromBool("vi-crucible-pop-visible", len(c.pop) != 0)).
+		Class(StyleFromBool("vi-crucible-pop-fullscreen", c.fullscreenPop)).
 		Class(StyleFromBool("vi-crucible-notifications-visible", c.notificationsVisible)).
 		Class(c.IClass).
 		Body(
@@ -166,6 +196,24 @@ func (c *crucible) Render() app.UI {
 							AsButton().
 							SVGIcon(ShareSVG).
 							OnClick(ShareCurrentURL),
+						app.If(c.installVisible, func() app.UI {
+							if !c.appleBrowser {
+								return NewMediaObject().
+									InLi().
+									AsButton().
+									SVGIcon(InstallSVG).
+									OnClick(InstallPWA)
+							}
+							return NewPoppable().
+								WithoutHover().
+								Content(
+									NewMediaObject().
+										InLi().
+										AsButton().
+										SVGIcon(InstallSVG),
+								).
+								Pop(NewHowToInstallOnAppleDevices(c.IName))
+						}),
 						NewMediaObject().
 							InLi().
 							AsButton().
@@ -182,8 +230,21 @@ func (c *crucible) Render() app.UI {
 			app.Div().
 				Class("vi-crucible-overlay").
 				OnClick(c.closeOverlay),
+			app.If(app.IsClient, func() app.UI {
+				return app.Aside().
+					Class("vi-crucible-pop").
+					Class("vi-unselectable").
+					Style("transform", fmt.Sprintf("translate(%vpx, %vpx)", c.popX, c.popY)).
+					OnClick(c.closeOverlay).
+					Body(
+						app.Range(c.pop).Slice(func(i int) app.UI {
+							return c.pop[i]
+						}),
+					)
+			}),
 			app.Div().
 				Class("vi-crucible-notifications").
+				Class("vi-unselectable").
 				OnClick(c.closeOverlay).
 				Body(
 					app.Aside().Body(c.INotifications...),
@@ -198,8 +259,81 @@ func (c *crucible) popPane(ctx app.Context, e app.Event) {
 func (c *crucible) closeOverlay(ctx app.Context, e app.Event) {
 	c.panePopped = false
 	c.notificationsVisible = false
+	c.fullscreenPop = false
+	c.pop = nil
 }
 
 func (c *crucible) showNotifications(ctx app.Context, e app.Event) {
 	c.notificationsVisible = true
+}
+
+func (c *crucible) handleShowPop(ctx app.Context, a app.Action) {
+	if c.fullscreenPop {
+		return
+	}
+
+	pop, ok := a.Value.([]app.UI)
+	if !ok {
+		return
+	}
+
+	c.fullscreenPop = a.Tags.Get("fullscreen") == "true"
+	if c.fullscreenPop {
+		c.pop = pop
+		return
+	}
+
+	if windowWidth, _ := app.Window().Size(); windowWidth < crucibleContentOnlyWidth {
+		return
+	}
+
+	c.pop = pop
+	c.initPopPosition.Do(func() {
+		c.popX, c.popY = app.Window().CursorPosition()
+	})
+
+	ctx.Defer(func(ctx app.Context) {
+		x, y := app.Window().CursorPosition()
+
+		popElements := app.Window().
+			Get("document").
+			Call("getElementsByClassName", "vi-crucible-pop")
+		if popElements.Length() == 0 {
+			return
+		}
+
+		popElement := popElements.Index(0)
+		popWidth := popElement.Get("offsetWidth").Int()
+		popHeight := popElement.Get("offsetHeight").Int()
+		windowWidth, windowHeight := app.Window().Size()
+
+		if x+popWidth > windowWidth {
+			x = windowWidth - popWidth
+		}
+		x = max(0, x)
+
+		if y+popHeight > windowHeight {
+			y = windowHeight - popHeight
+		}
+		y = max(0, y)
+
+		if x != c.popX || y != c.popY {
+			ctx.Dispatch(func(ctx app.Context) {
+				c.popX = x
+				c.popY = y
+			})
+		}
+	})
+}
+
+func (c *crucible) handleHidePop(ctx app.Context, a app.Action) {
+	if !c.fullscreenPop {
+		c.pop = nil
+	}
+}
+
+func (c *crucible) handleClosePop(ctx app.Context, a app.Action) {
+	if c.fullscreenPop {
+		c.closeOverlay(ctx, app.Event{})
+	}
 }

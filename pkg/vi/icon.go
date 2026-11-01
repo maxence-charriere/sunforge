@@ -343,6 +343,12 @@ var (
 	ShareSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M2 12H4V17H20V12H22V17C22 18.11 21.11 19 20 19H4C2.9 19 2 18.11 2 17V12M12 2L6.46 7.46L7.88 8.88L11 5.75V15H13V5.75L16.13 8.88L17.55 7.45L12 2Z" />
 	</svg>`
+	ShareVariantSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M12,1L8,5H11V14H13V5H16M18,23H6C4.89,23 4,22.1 4,21V9A2,2 0 0,1 6,7H9V9H6V21H18V9H15V7H18A2,2 0 0,1 20,9V21A2,2 0 0,1 18,23Z" />
+	</svg>`
+	InstallSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M21 16H3V4H21M21 2H3C1.9 2 1 2.9 1 4V16C1 17.1 1.9 18 3 18H10V20H8V22H16V20H14V18H21C22.1 18 23 17.1 23 16V4C23 2.9 22.1 2 21 2M16 10H13V6H11V10H8L12 14L16 10" />
+	</svg>`
 )
 
 const (
