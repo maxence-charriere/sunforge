@@ -374,12 +374,14 @@ button {
   --crucible_menu_section_padding: 36px 0 4px;
   --crucible_menu_item_padding: 2px 0;
 
-  --crucible_nav_height: 48px;
+  --crucible_nav_height: 60px;
   --crucible_nav_border_radius: 30px;
   --crucible_nav_padding: 5px 30px;
   --crucible_nav_gap: 30px;
   --crucible_nav_background: var(--background-color);
   --crucible_nav_pane_button_display: block;
+
+  --crucible_notifications_badge_size: 12px;
 }
 
 .vi-crucible {
@@ -611,6 +613,20 @@ button {
 
 .vi-crucible-nav>ul>li:first-child {
   display: var(--crucible_nav_pane_button_display);
+}
+
+
+.vi-crucible-notifications-badge::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  box-sizing: border-box;
+  width: var(--crucible_notifications_badge_size);
+  height: var(--crucible_notifications_badge_size);
+  border: 2px solid var(--crucible_nav_background);
+  border-radius: 100%;
+  background: var(--error_color);
 }
 
 /*

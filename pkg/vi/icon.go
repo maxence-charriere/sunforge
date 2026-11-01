@@ -181,6 +181,9 @@ var (
 	BellSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" />
 	</svg>`
+	BellBadgeSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M21 6.5C21 8.43 19.43 10 17.5 10S14 8.43 14 6.5 15.57 3 17.5 3 21 4.57 21 6.5M19 11.79C18.5 11.92 18 12 17.5 12C14.47 12 12 9.53 12 6.5C12 5.03 12.58 3.7 13.5 2.71C13.15 2.28 12.61 2 12 2C10.9 2 10 2.9 10 4V4.29C7.03 5.17 5 7.9 5 11V17L3 19V20H21V19L19 17V11.79M12 23C13.11 23 14 22.11 14 21H10C10 22.11 10.9 23 12 23Z" />
+	</svg>`
 	CloseSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
 	</svg>`
@@ -336,6 +339,9 @@ var (
 	</svg>`
 	MenuSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+	</svg>`
+	ShareSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M2 12H4V17H20V12H22V17C22 18.11 21.11 19 20 19H4C2.9 19 2 18.11 2 17V12M12 2L6.46 7.46L7.88 8.88L11 5.75V15H13V5.75L16.13 8.88L17.55 7.45L12 2Z" />
 	</svg>`
 )
 
@@ -580,6 +586,7 @@ var (
 		{"billing", CreditCardSVG},
 		{"fire", FireSVG},
 		{"menu", MenuSVG},
+		{"share", ShareSVG},
 
 		{"discord", DiscordSVG},
 		{"twitter", TwitterSVG},

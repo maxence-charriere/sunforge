@@ -19,33 +19,29 @@ type Crucible interface {
 	Footer(...app.UI) Crucible
 	Ads(...app.UI) Crucible
 	Notifications(...app.UI) Crucible
-	NotificationsSVGIcon(string) Crucible
-	NotificationsMark(bool) Crucible
+	NotificationsBadge(bool) Crucible
 }
 
 func NewCrucible() Crucible {
-	return &crucible{
-		INotificationSVGIcon: BellSVG,
-	}
+	return &crucible{}
 }
 
 type crucible struct {
 	app.Compo
 
-	IID                  string
-	IClass               string
-	IIcon                string
-	IName                string
-	IVersion             string
-	IMenu                []app.UI
-	IIndex               []app.UI
-	INav                 []app.UI
-	IContent             []app.UI
-	IFooter              []app.UI
-	IAds                 []app.UI
-	INotifications       []app.UI
-	INotificationSVGIcon string
-	INotificationsMark   bool
+	IID                 string
+	IClass              string
+	IIcon               string
+	IName               string
+	IVersion            string
+	IMenu               []app.UI
+	IIndex              []app.UI
+	INav                []app.UI
+	IContent            []app.UI
+	IFooter             []app.UI
+	IAds                []app.UI
+	INotifications      []app.UI
+	INotificationsBadge bool
 
 	pop        []app.UI
 	panePopped bool
@@ -111,13 +107,8 @@ func (c *crucible) Notifications(v ...app.UI) Crucible {
 	return c
 }
 
-func (c *crucible) NotificationsSVGIcon(v string) Crucible {
-	c.INotificationSVGIcon = v
-	return c
-}
-
-func (c *crucible) NotificationsMark(v bool) Crucible {
-	c.INotificationsMark = v
+func (c *crucible) NotificationsBadge(v bool) Crucible {
+	c.INotificationsBadge = v
 	return c
 }
 
@@ -171,13 +162,14 @@ func (c *crucible) Render() app.UI {
 						NewMediaObject().
 							InLi().
 							AsButton().
-							SVGIcon(SendSVG).
+							SVGIcon(ShareSVG).
 							OnClick(ShareCurrentURL).
 							Help("Share"),
 						NewMediaObject().
 							InLi().
 							AsButton().
-							SVGIcon(c.INotificationSVGIcon),
+							Class(StyleFromBool("vi-crucible-notifications-badge", c.INotificationsBadge)).
+							SVGIcon(BellSVG),
 					),
 				),
 			app.Aside().
