@@ -43,8 +43,9 @@ type crucible struct {
 	INotifications      []app.UI
 	INotificationsBadge bool
 
-	pop        []app.UI
-	panePopped bool
+	pop                  []app.UI
+	panePopped           bool
+	notificationsVisible bool
 }
 
 func (c *crucible) ID(v string) Crucible {
@@ -119,6 +120,7 @@ func (c *crucible) Render() app.UI {
 		Class(StyleFromBool("vi-crucible-without-ads", len(c.IAds) == 0)).
 		Class(StyleFromBool("vi-crucible-with-ads", len(c.IAds) != 0)).
 		Class(StyleFromBool("vi-crucible-pane-popped", c.panePopped)).
+		Class(StyleFromBool("vi-crucible-notifications-visible", c.notificationsVisible)).
 		Class(c.IClass).
 		Body(
 			app.Nav().
@@ -163,23 +165,29 @@ func (c *crucible) Render() app.UI {
 							InLi().
 							AsButton().
 							SVGIcon(ShareSVG).
-							OnClick(ShareCurrentURL).
-							Help("Share"),
+							OnClick(ShareCurrentURL),
 						NewMediaObject().
 							InLi().
 							AsButton().
 							Class(StyleFromBool("vi-crucible-notifications-badge", c.INotificationsBadge)).
-							SVGIcon(BellSVG),
+							SVGIcon(BellSVG).
+							OnClick(c.showNotifications),
 					),
 				),
-			app.Aside().
+			app.Div().
 				Class("vi-crucible-ads").
 				Body(
-					app.Div().Body(c.IAds...),
+					app.Aside().Body(c.IAds...),
 				),
 			app.Div().
 				Class("vi-crucible-overlay").
 				OnClick(c.closeOverlay),
+			app.Div().
+				Class("vi-crucible-notifications").
+				OnClick(c.closeOverlay).
+				Body(
+					app.Aside().Body(c.INotifications...),
+				),
 		)
 }
 
@@ -189,4 +197,9 @@ func (c *crucible) popPane(ctx app.Context, e app.Event) {
 
 func (c *crucible) closeOverlay(ctx app.Context, e app.Event) {
 	c.panePopped = false
+	c.notificationsVisible = false
+}
+
+func (c *crucible) showNotifications(ctx app.Context, e app.Event) {
+	c.notificationsVisible = true
 }

@@ -382,6 +382,7 @@ button {
   --crucible_nav_pane_button_display: block;
 
   --crucible_notifications_badge_size: 12px;
+  --crucible_notifications_display: none;
 }
 
 .vi-crucible {
@@ -394,16 +395,14 @@ button {
 }
 
 .vi-crucible-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
   background: var(--crucible_overlay_background);
   display: var(--crucible_overlay_display);
+  z-index: var(--crucible_overlay_zindex);
 }
 
-.vi-crucible.vi-crucible-pane-popped {
+.vi-crucible-pane-popped {
   --crucible_pane_display: grid;
   --crucible_pane_justify_self: center;
   --crucible_overlay_display: block;
@@ -452,7 +451,7 @@ button {
   grid-template-rows: 1fr var(--crucible_ads_video_height);
 }
 
-.vi-crucible-ads>div {
+.vi-crucible-ads>* {
   align-self: center;
   justify-self: center;
   grid-column: 1 / span 1;
@@ -615,6 +614,32 @@ button {
   display: var(--crucible_nav_pane_button_display);
 }
 
+
+.vi-crucible-notifications {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+
+  display: var(--crucible_notifications_display);
+  grid-template-columns: 1fr minmax(0, var(--crucible_pane_width));
+  grid-template-rows: 1fr;
+  z-index: calc(var(--crucible_overlay_zindex) + 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.vi-crucible-notifications-visible {
+  --crucible_notifications_display: grid;
+  --crucible_overlay_display: block;
+}
+
+.vi-crucible-notifications>* {
+  grid-column: 2 / span 1;
+  grid-row: 1;
+  align-self: center;
+
+  box-sizing: border-box;
+  padding: var(--crucible_nav_height) var(--crucible_content_padding_w) var(--crucible_content_padding_h);
+}
 
 .vi-crucible-notifications-badge::after {
   content: "";
