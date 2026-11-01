@@ -186,7 +186,12 @@ func (c *crucible) Render() app.UI {
 
 			app.Div().
 				Class("vi-crucible-content").
-				Body(c.IContent...),
+				Body(
+					app.Main().
+						ID(PageTopID).
+						Body(c.IContent...),
+					app.Footer().Body(c.IFooter...),
+				),
 
 			app.Nav().
 				Class("vi-crucible-nav").
