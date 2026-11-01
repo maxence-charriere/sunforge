@@ -705,6 +705,15 @@ button {
   background: var(--error_color);
 }
 
+
+.vi-crucible-update {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  padding: var(--crucible_nav_height) var(--crucible_content_padding_w) var(--crucible_content_padding_h);
+  background: var(--crucible_overlay_background);
+  z-index: calc(var(--crucible_overlay_zindex) + 3);
+}
+
 /*
 **
 ** Layout
@@ -2657,6 +2666,38 @@ div[data-vi="svg"] {
 .vi-install-pwa ol>li svg {
   width: var(--body_font_size);
   height: var(--body_font_size);
+}
+
+
+/*
+**
+** Update PWA
+**
+*/
+:root {
+  --update_pwa_icon_size: 90px;
+  --update_pwa_gap: 24px;
+}
+
+.vi-update-pwa {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--update_pwa_gap);
+  cursor: pointer;
+}
+
+.vi-update-pwa>*:nth-child(1) {
+  width: var(--update_pwa_icon_size);
+  height: var(--update_pwa_icon_size);
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.vi-update-pwa p {
+  margin: 3px 0 0;
+  color: var(--accent_color);
 }
 
 /*

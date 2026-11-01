@@ -54,6 +54,7 @@ type crucible struct {
 	notificationsVisible bool
 	installVisible       bool
 	appleBrowser         bool
+	updateVisible        bool
 
 	pop             []app.UI
 	popX            int
@@ -133,6 +134,7 @@ func (c *crucible) OnMount(ctx app.Context) {
 	ctx.Handle(closePop, c.handleClosePop)
 
 	c.OnAppInstallChange(ctx)
+	c.OnAppUpdate(ctx)
 }
 
 func (c *crucible) OnNav(ctx app.Context) {
@@ -141,6 +143,10 @@ func (c *crucible) OnNav(ctx app.Context) {
 func (c *crucible) OnAppInstallChange(ctx app.Context) {
 	c.installVisible = ctx.IsAppInstallable()
 	c.appleBrowser = ctx.IsAppleBrowser()
+}
+
+func (c *crucible) OnAppUpdate(ctx app.Context) {
+	c.updateVisible = ctx.AppUpdateAvailable()
 }
 
 func (c *crucible) Render() app.UI {
@@ -177,9 +183,11 @@ func (c *crucible) Render() app.UI {
 						Class("vi-crucible-index").
 						Body(c.IIndex...),
 				),
+
 			app.Div().
 				Class("vi-crucible-content").
 				Body(c.IContent...),
+
 			app.Nav().
 				Class("vi-crucible-nav").
 				Body(
@@ -224,14 +232,17 @@ func (c *crucible) Render() app.UI {
 							OnClick(c.showNotifications),
 					),
 				),
+
 			app.Div().
 				Class("vi-crucible-ads").
 				Body(
 					app.Aside().Body(c.IAds...),
 				),
+
 			app.Div().
 				Class("vi-crucible-overlay").
 				OnClick(c.closeOverlay),
+
 			app.If(app.IsClient, func() app.UI {
 				return app.Aside().
 					Class("vi-crucible-pop").
@@ -244,6 +255,7 @@ func (c *crucible) Render() app.UI {
 						}),
 					)
 			}),
+
 			app.Div().
 				Class("vi-crucible-notifications").
 				Class("vi-unselectable").
@@ -251,6 +263,12 @@ func (c *crucible) Render() app.UI {
 				Body(
 					app.Aside().Body(c.INotifications...),
 				),
+
+			app.If(c.updateVisible, func() app.UI {
+				return newUpdatePWA(c.IName).
+					Class("vi-crucible-update").
+					Class("vi-unselectable")
+			}),
 		)
 }
 
