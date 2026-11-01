@@ -384,7 +384,7 @@ func (l *layout) Render() app.UI {
 											AsButton().
 											SVGIcon(DefaultDownloadSVG).
 											Helpf("Install %s", l.IAppName)).
-										Pop()
+										Pop(NewHowToInstallOnAppleDevices(l.IAppName))
 								}),
 							),
 						),

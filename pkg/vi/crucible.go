@@ -3,6 +3,7 @@ package vi
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
@@ -55,6 +56,7 @@ type crucible struct {
 	installVisible       bool
 	appleBrowser         bool
 	updateVisible        bool
+	currentYear          int
 
 	pop             []app.UI
 	popX            int
@@ -135,6 +137,8 @@ func (c *crucible) OnMount(ctx app.Context) {
 
 	c.OnAppInstallChange(ctx)
 	c.OnAppUpdate(ctx)
+
+	c.currentYear = time.Now().Year()
 }
 
 func (c *crucible) OnNav(ctx app.Context) {
@@ -190,11 +194,39 @@ func (c *crucible) Render() app.UI {
 					app.Main().
 						ID(PageTopID).
 						Body(c.IContent...),
-					app.Footer().Body(c.IFooter...),
+					app.Footer().
+						Class("vi-unselectable").
+						Body(
+							app.Ul().Body(
+								app.Range(c.IFooter).Slice(func(i int) app.UI {
+									return app.Li().Body(c.IFooter[i])
+								}),
+								NewMediaObject().
+									InLi().
+									AsA().
+									Class(StyleFromURLPath("accent", "/terms")).
+									Href("/terms").
+									Text("Terms of Service"),
+								NewMediaObject().
+									InLi().
+									AsA().
+									Class(StyleFromURLPath("accent", "/privacy")).
+									Href("/privacy").
+									Text("Privacy Policy"),
+								NewMediaObject().
+									InLi().
+									SVGIcon(CopyrightSVG).
+									Textf("%v %s",
+										c.currentYear,
+										c.IName,
+									),
+							),
+						),
 				),
 
 			app.Nav().
 				Class("vi-crucible-nav").
+				Class("vi-unselectable").
 				Body(
 					app.Ul().Body(
 						NewMediaObject().
@@ -204,7 +236,7 @@ func (c *crucible) Render() app.UI {
 							OnClick(c.popPane),
 						app.Range(c.INav).
 							Slice(func(i int) app.UI {
-								return c.INav[i]
+								return app.Li().Body(c.INav[i])
 							}),
 						NewMediaObject().
 							InLi().

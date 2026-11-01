@@ -379,6 +379,8 @@ button {
   --crucible_nav_background: var(--background-color);
   --crucible_nav_pane_button_display: block;
 
+  --crucible_footer_gap: 6px 30px;
+
   --crucible_pop_display: none;
   --crucible_pop_transition: transform 100ms linear;
   --crucible_pop_gap: 6px;
@@ -582,7 +584,8 @@ button {
 }
 
 .vi-crucible-pane ul,
-.vi-crucible-pane ol {
+.vi-crucible-pane ol,
+.vi-crucible footer>ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -621,11 +624,20 @@ button {
 
 .vi-crucible-content>main {
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 .vi-crucible-content>footer {
-  overflow: hidden;
+  align-self: center;
+  justify-self: center;
+  box-sizing: content-box;
+  padding: var(--crucible_content_padding_h) 0;
+}
+
+.vi-crucible-content>footer>ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--crucible_footer_gap);
 }
 
 .vi-crucible-pop {
