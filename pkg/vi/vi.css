@@ -1232,37 +1232,30 @@ button {
 */
 :root {
   --tiles_item_base_width: 448px;
+  --tiles_item_small_width: 336px;
+  --tiles_item_large_width: 960px;
   --tiles_gap: 12px;
 }
 
 .vi-tiles {
   width: 100%;
+  max-width: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fit,
-      minmax(var(--tiles_item_base_width), 1fr));
+      minmax(min(100%, var(--tiles_item_base_width)), 1fr));
   gap: var(--tiles_gap);
 }
 
-.vi-tiles.vi-tiles-smaller {
-  --tiles_item_base_width: 336px;
+.vi-tiles>* {
+  max-width: 100%;
 }
 
-.vi-tiles.vi-tiles-with-large-items {
-  --tiles_item_base_width: 960px;
+.vi-tiles-small-items {
+  --tiles_item_base_width: var(--tiles_item_small_width);
 }
 
-@media (max-width: calc(960px + 30px * 2)) {
-  .vi-tiles.vi-tiles-with-large-items {
-    --tiles_item_base_width: 100%;
-  }
-}
-
-@media (max-width: 500px) {
-
-  .vi-tiles,
-  .vi-tiles.vi-tiles-smaller {
-    --tiles_item_base_width: 100%;
-  }
+.vi-tiles-large-items {
+  --tiles_item_base_width: var(--tiles_item_large_width);
 }
 
 /*
