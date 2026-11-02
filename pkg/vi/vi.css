@@ -369,12 +369,12 @@ button {
   --crucible_logo_version_size: 10px;
   --crucible_logo_text_transform: uppercase;
   --crucible_logo_gap: 0;
-  --crucible_menu_section_padding: 36px 0 4px;
+  --crucible_menu_section_padding: 36px 0 6px;
   --crucible_menu_item_padding: 2px 0;
 
   --crucible_nav_height: 60px;
   --crucible_nav_border_radius: 30px;
-  --crucible_nav_padding: 5px 30px;
+  --crucible_nav_padding: 6px 30px;
   --crucible_nav_gap: 30px;
   --crucible_nav_background: var(--background-color);
   --crucible_nav_pane_button_display: block;
