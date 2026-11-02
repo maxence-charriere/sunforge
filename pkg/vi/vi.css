@@ -362,7 +362,7 @@ button {
   --crucible_overlay_zindex: 100000;
   --crucible_overlay_display: none;
   --crucible_overlay_background: linear-gradient(var(--background-color),
-      rgba(0, 0, 0, 0.9));
+      rgba(0, 0, 0, 0.95));
 
   --crucible_logo_size: 90px;
   --crucible_logo_title_size: 30px;
@@ -393,6 +393,7 @@ button {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-columns: var(--crucible_columns);
   grid-template-rows: var(--crucible_nav_height) 1fr;
