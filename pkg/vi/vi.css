@@ -615,6 +615,7 @@ button {
   border-radius: var(--crucible_nav_border_radius);
   padding: var(--crucible_nav_padding);
   background: var(--crucible_nav_background);
+  z-index: 2;
 }
 
 .vi-crucible-nav>ul {
@@ -1231,7 +1232,6 @@ button {
 */
 :root {
   --tiles_item_base_width: 448px;
-  --tiles_item_base_height: 222px;
   --tiles_gap: 12px;
 }
 
@@ -1241,15 +1241,6 @@ button {
   grid-template-columns: repeat(auto-fit,
       minmax(var(--tiles_item_base_width), 1fr));
   gap: var(--tiles_gap);
-}
-
-.vi-tiles>*,
-.vi-tiles>.vi-box.vi-box-without-padding {
-  min-height: var(--tiles_item_base_height);
-}
-
-.vi-tiles>.vi-box {
-  min-height: calc(var(--tiles_item_base_height) - 2 * var(--box_padding_h));
 }
 
 .vi-tiles.vi-tiles-smaller {
