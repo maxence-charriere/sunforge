@@ -119,23 +119,44 @@ func (b *banner) Render() app.UI {
 		Class("vi-banner").
 		Class(IfTrue(b.IWithFullHeight, "vi-banner-full")).
 		Class(IfTrue(b.IWithImageAlignedTop, "vi-banner-image-top")).
+		Class("vi-unselectable").
 		Class(b.IClass).
 		Body(
-			app.Div().Body(b.IMedia),
-			app.Div().Body(
-				app.H1().Text(b.ITitle),
-				app.If(len(b.IContent) != 0, func() app.UI {
-					return app.Div().Body(b.IContent...)
-				}),
-				app.If(len(b.INav) != 0, func() app.UI {
-					return NewBox().
-						AsUl().
-						WithColumns().
-						WithoutBackground().
-						WithoutPadding().
-						Class("p").
-						Content(b.INav...)
-				}),
-			),
+			app.Div().
+				Class("vi-banner-media").
+				Body(b.IMedia),
+			app.Div().
+				Class("vi-banner-content").
+				Body(
+					app.H1().Text(b.ITitle),
+					app.If(len(b.IContent) != 0, func() app.UI {
+						return app.Div().Body(b.IContent...)
+					}),
+					app.If(len(b.INav) != 0, func() app.UI {
+						return app.Ul().Body(
+							app.Range(b.INav).Slice(func(i int) app.UI {
+								return app.Li().Body(b.INav[i])
+							}),
+						)
+					}),
+				),
+
+			// app.Div().
+			// 	Class("vi-banner-content").
+			// 	Body(
+			// 		app.H1().Text(b.ITitle),
+			// 		app.If(len(b.IContent) != 0, func() app.UI {
+			// 			return app.Div().Body(b.IContent...)
+			// 		}),
+			// 		app.If(len(b.INav) != 0, func() app.UI {
+			// 			return NewBox().
+			// 				AsUl().
+			// 				WithColumns().
+			// 				WithoutBackground().
+			// 				WithoutPadding().
+			// 				Class("p").
+			// 				Content(b.INav...)
+			// 		}),
+			// 	),
 		)
 }
