@@ -466,6 +466,13 @@ button {
   grid-row: var(--crubible_ads_content_row);
 }
 
+/* Phone Device */
+@media (max-width: 440px) {
+  :root {
+    --crucible_content_padding_w: 12px;
+  }
+}
+
 /* Crucible Content + Ads */
 @media (min-width: 1302px) {
   .vi-crucible.vi-crucible-with-ads {
