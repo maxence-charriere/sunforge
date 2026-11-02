@@ -632,12 +632,18 @@ button {
 }
 
 .vi-crucible-content>main {
+  grid-column: 1 / span 1;
+  grid-row: 1 / span 1;
+
   box-sizing: border-box;
 }
 
 .vi-crucible-content>footer {
+  grid-column: 1 / -1;
+  grid-row: 2 / span 1;
   align-self: center;
   justify-self: center;
+
   box-sizing: content-box;
   padding: var(--crucible_content_padding_h) 0;
 }
