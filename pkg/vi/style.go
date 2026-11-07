@@ -20,7 +20,7 @@ func StyleFromBool(className string, v bool) string {
 // or starts with the given path.
 func StyleFromURLPath(className string, path string) string {
 	pagePath := app.Window().URL().Path
-	if pagePath == "/" {
+	if path == "/" {
 		return StyleFromBool(className, pagePath == path)
 	}
 	return StyleFromBool(className, strings.HasPrefix(pagePath, path))
