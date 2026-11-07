@@ -1191,25 +1191,6 @@ button {
   }
 }
 
-@keyframes app_update_bounce {
-  0% {
-    opacity: 0;
-  }
-
-  60% {
-    opacity: 1;
-    transform: translateY(-5px);
-  }
-
-  80% {
-    transform: translateY(5px);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
-}
-
 /*
 **
 ** Tiles
@@ -2735,9 +2716,32 @@ div[data-vi="svg"] {
   flex-grow: 0;
 }
 
+.vi-update-pwa svg {
+  animation: app_update_bounce 1s infinite alternate ease-in;
+}
+
 .vi-update-pwa p {
   margin: 3px 0 0;
   color: var(--accent_color);
+}
+
+@keyframes app_update_bounce {
+  0% {
+    opacity: 0;
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+
+  80% {
+    transform: translateY(5px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
 }
 
 /*
