@@ -18,7 +18,6 @@ type Crucible interface {
 	ID(v string) Crucible
 	Class(v ...string) Crucible
 	Icon(string) Crucible
-	Name(string) Crucible
 	Version(string) Crucible
 	Menu(...app.UI) Crucible
 	Index(...app.UI) Crucible
@@ -30,8 +29,11 @@ type Crucible interface {
 	NotificationsBadge(bool) Crucible
 }
 
-func NewCrucible() Crucible {
-	return &crucible{}
+func NewCrucible(appName string) Crucible {
+	return &crucible{
+		IAppName:    appName,
+		currentYear: time.Now().Year(),
+	}
 }
 
 type crucible struct {
@@ -40,7 +42,7 @@ type crucible struct {
 	IID                 string
 	IClass              string
 	IIcon               string
-	IName               string
+	IAppName            string
 	IVersion            string
 	IMenu               []app.UI
 	IIndex              []app.UI
@@ -63,6 +65,9 @@ type crucible struct {
 	popY            int
 	fullscreenPop   bool
 	initPopPosition sync.Once
+
+	observer      app.Value
+	closeObserver func()
 }
 
 func (c *crucible) ID(v string) Crucible {
@@ -77,11 +82,6 @@ func (c *crucible) Class(v ...string) Crucible {
 
 func (c *crucible) Icon(v string) Crucible {
 	c.IIcon = v
-	return c
-}
-
-func (c *crucible) Name(v string) Crucible {
-	c.IName = v
 	return c
 }
 
@@ -134,14 +134,17 @@ func (c *crucible) OnMount(ctx app.Context) {
 	ctx.Handle(showPop, c.handleShowPop)
 	ctx.Handle(hidePop, c.handleHidePop)
 	ctx.Handle(closePop, c.handleClosePop)
+	ctx.Handle(observeElement, c.handleObserveElement)
+	ctx.Handle(unobserveElement, c.handleUnobserveElement)
 
 	c.OnAppInstallChange(ctx)
 	c.OnAppUpdate(ctx)
 
-	c.currentYear = time.Now().Year()
+	c.initObservables(ctx)
 }
 
 func (c *crucible) OnNav(ctx app.Context) {
+	c.closeOverlay(ctx, app.Event{})
 }
 
 func (c *crucible) OnAppInstallChange(ctx app.Context) {
@@ -151,6 +154,10 @@ func (c *crucible) OnAppInstallChange(ctx app.Context) {
 
 func (c *crucible) OnAppUpdate(ctx app.Context) {
 	c.updateVisible = ctx.AppUpdateAvailable()
+}
+
+func (c *crucible) OnDismount() {
+	c.closeObservables()
 }
 
 func (c *crucible) Render() app.UI {
@@ -175,9 +182,9 @@ func (c *crucible) Render() app.UI {
 						Href("/").
 						Body(
 							app.Img().
-								Altf("%s Logo", c.IName).
+								Altf("%s Logo", c.IAppName).
 								Src(c.IIcon),
-							app.Div().Text(c.IName),
+							app.Div().Text(c.IAppName),
 							app.Div().Text(c.IVersion),
 						),
 					app.Div().
@@ -218,7 +225,7 @@ func (c *crucible) Render() app.UI {
 									SVGIcon(CopyrightSVG).
 									Textf("%v %s",
 										c.currentYear,
-										c.IName,
+										c.IAppName,
 									),
 							),
 						),
@@ -259,7 +266,7 @@ func (c *crucible) Render() app.UI {
 										AsButton().
 										SVGIcon(InstallSVG),
 								).
-								Pop(NewHowToInstallOnAppleDevices(c.IName))
+								Pop(NewHowToInstallOnAppleDevices(c.IAppName))
 						}),
 						NewMediaObject().
 							InLi().
@@ -302,7 +309,7 @@ func (c *crucible) Render() app.UI {
 				),
 
 			app.If(c.updateVisible, func() app.UI {
-				return newUpdatePWA(c.IName).
+				return newUpdatePWA(c.IAppName).
 					Class("vi-crucible-update").
 					Class("vi-unselectable")
 			}),
@@ -393,4 +400,58 @@ func (c *crucible) handleClosePop(ctx app.Context, a app.Action) {
 	if c.fullscreenPop {
 		c.closeOverlay(ctx, app.Event{})
 	}
+}
+
+func (c *crucible) initObservables(ctx app.Context) {
+	intersectionObserver := app.Window().Get("IntersectionObserver")
+	if !intersectionObserver.Truthy() {
+		return
+	}
+
+	intersectionObserverForeach := app.FuncOf(func(this app.Value, args []app.Value) any {
+		entry := args[0]
+		if !entry.Get("isIntersecting").Bool() {
+			return nil
+		}
+		ctx.NewActionWithValue(notifyObserverIntersection, entry.Get("target"))
+		return nil
+	})
+
+	intersectionObserverCallback := app.FuncOf(func(this app.Value, args []app.Value) any {
+		entries := args[0]
+		entries.Call("forEach", intersectionObserverForeach)
+		return nil
+	})
+
+	c.observer = intersectionObserver.New(intersectionObserverCallback)
+	c.closeObserver = func() {
+		c.observer.Call("disconnect")
+		intersectionObserverCallback.Release()
+		intersectionObserverForeach.Release()
+	}
+}
+
+func (c *crucible) closeObservables() {
+	if c.closeObserver == nil {
+		return
+	}
+	c.closeObserver()
+	c.closeObserver = nil
+	c.observer = nil
+}
+
+func (c *crucible) handleObserveElement(ctx app.Context, a app.Action) {
+	elem, ok := a.Value.(app.Value)
+	if !ok || !elem.Truthy() || c.observer == nil {
+		return
+	}
+	c.observer.Call("observe", elem)
+}
+
+func (c *crucible) handleUnobserveElement(ctx app.Context, a app.Action) {
+	elem, ok := a.Value.(app.Value)
+	if !ok || !elem.Truthy() || c.observer == nil {
+		return
+	}
+	c.observer.Call("unobserve", elem)
 }

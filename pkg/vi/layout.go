@@ -33,10 +33,6 @@ var (
 const (
 	// The id of the top of the page.
 	PageTopID = "vi-page-top"
-
-	notifyObserverIntersection = "/actions/vi/layout/observer/intersection"
-	observeElement             = "/actions/vi/observer/observe"
-	unobserveElement           = "/actions/vi/observer/unobserve"
 )
 
 type Layout interface {
