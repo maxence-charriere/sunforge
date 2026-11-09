@@ -4,6 +4,12 @@ import (
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
+const (
+	showPop  = "/actions/vi/poppable/pop/show"
+	hidePop  = "/actions/vi/poppable/pop/hide"
+	closePop = "/actions/vi/poppable/pop/close"
+)
+
 type Poppable interface {
 	app.UI
 
@@ -112,18 +118,18 @@ func (p *poppable) onMouseHover(ctx app.Context, e app.Event) {
 	if p.IWithoutHover {
 		return
 	}
-	ctx.NewActionWithValue(showPoppable, p.IPop)
+	ctx.NewActionWithValue(showPop, p.IPop)
 }
 
 func (p *poppable) onMouseLeave(ctx app.Context, e app.Event) {
 	if p.IWithoutHover {
 		return
 	}
-	ctx.NewAction(hidePoppable)
+	ctx.NewAction(hidePop)
 }
 
 func (p *poppable) onClick(ctx app.Context, e app.Event) {
 	e.PreventDefault()
 	e.StopImmediatePropagation()
-	ctx.NewActionWithValue(showPoppable, p.IPop, app.T("fullscreen", true))
+	ctx.NewActionWithValue(showPop, p.IPop, app.T("fullscreen", true))
 }

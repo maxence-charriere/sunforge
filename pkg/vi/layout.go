@@ -33,13 +33,6 @@ var (
 const (
 	// The id of the top of the page.
 	PageTopID = "vi-page-top"
-
-	showPoppable               = "/actions/vi/layout/poppable/show"
-	hidePoppable               = "/actions/vi/layout/poppable/hide"
-	closePoppable              = "/actions/vi/layout/poppable/close"
-	notifyObserverIntersection = "/actions/vi/layout/observer/intersection"
-	observeElement             = "/actions/vi/observer/observe"
-	unobserveElement           = "/actions/vi/observer/unobserve"
 )
 
 type Layout interface {
@@ -165,9 +158,9 @@ func (l *layout) NotificationsIcon(v string) Layout {
 }
 
 func (l *layout) OnMount(ctx app.Context) {
-	ctx.Handle(showPoppable, l.handleShowPoppable)
-	ctx.Handle(hidePoppable, l.handleHidePoppable)
-	ctx.Handle(closePoppable, l.handleClosePoppable)
+	ctx.Handle(showPop, l.handleShowPoppable)
+	ctx.Handle(hidePop, l.handleHidePoppable)
+	ctx.Handle(closePop, l.handleClosePoppable)
 	ctx.Handle(observeElement, l.handleObserveElement)
 	ctx.Handle(unobserveElement, l.handleUnobserveElement)
 
@@ -387,74 +380,7 @@ func (l *layout) Render() app.UI {
 											AsButton().
 											SVGIcon(DefaultDownloadSVG).
 											Helpf("Install %s", l.IAppName)).
-										Pop(NewBox().
-											WithoutSelection().
-											WithGap().
-											Class("vi-layout-apple-poppable-box").
-											Content(
-												NewMediaObject().
-													AsH2().
-													WithHorizontalCentering().
-													WithExtraLargeMedia().
-													SVGIcon(AppleSVG).
-													Textf("Install %s on IPhone, IPad & Mac", l.IAppName),
-												app.P().Textf("You can install %s as a Progressive Web App (PWA) on your Apple device to open it directly from your Home Screen or Dock in its own window, just like a native app.", l.IAppName),
-												app.H3().Text("iPhone or iPad"),
-												app.Ol().Body(
-													app.Li().Body(
-														app.Text("On the right of the address bar, tap the "),
-														app.Span().
-															Class("accent").
-															Text("…"),
-														app.Text(" button"),
-													),
-													app.Li().Body(
-														app.Text("Choose "),
-														app.Span().
-															Class("accent").
-															Text("Share"),
-													),
-													app.Li().Body(
-														app.Text("Select "),
-														app.Span().
-															Class("accent").
-															Text("Add to Home Screen"),
-													),
-													app.Li().Body(
-														app.Text("Confirm with "),
-														app.Span().
-															Class("accent").
-															Text("Add"),
-														app.Text(" or "),
-														app.Span().
-															Class("accent").
-															Text("✓"),
-													),
-												),
-												app.H3().Text("MacOS (Safari)"),
-												app.Ol().Body(
-													app.Li().Body(
-														app.Text("On the right of the address bar, click on the "),
-														app.Span().
-															Class("accent").
-															Text("Share"),
-														app.Text(" button"),
-													),
-													app.Li().Body(
-														app.Text("Choose "),
-														app.Span().
-															Class("accent").
-															Text("Add to Dock"),
-														app.Text(" from the menu"),
-													),
-													app.Li().Body(
-														app.Text("In the dialog that appears, click "),
-														app.Span().
-															Class("accent").
-															Text("Add"),
-													),
-												),
-											))
+										Pop(NewHowToInstallOnAppleDevices(l.IAppName))
 								}),
 							),
 						),
@@ -590,7 +516,7 @@ func (l *layout) updateApp(ctx app.Context, e app.Event) {
 }
 
 func (l *layout) closeFullscreenPoppable(ctx app.Context, e app.Event) {
-	ctx.NewAction(closePoppable)
+	ctx.NewAction(closePop)
 }
 
 func ShareCurrentURL(ctx app.Context, e app.Event) {

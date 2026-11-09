@@ -4,6 +4,12 @@ import (
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
+const (
+	notifyObserverIntersection = "/actions/vi/observer/intersection"
+	observeElement             = "/actions/vi/observer/observe"
+	unobserveElement           = "/actions/vi/observer/unobserve"
+)
+
 type Observer interface {
 	app.UI
 
