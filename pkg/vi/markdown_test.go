@@ -61,7 +61,12 @@ func TestMarkdownReader(t *testing.T) {
 		},
 		{
 			scenario: "empty H1 clears title",
-			in:       "# Earlier title\n\n#",
+			in:       "# Earlier title\n\n# ###",
+		},
+		{
+			scenario: "bare hashes and other headings preserve title",
+			in:       "# Earlier title\n\n#\n# \n#\t\n#hashtag\n## Subtitle\n##\tSubtitle",
+			expected: MarkdownDocument{Title: "Earlier title"},
 		},
 		{
 			scenario: "description comment",

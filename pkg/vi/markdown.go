@@ -132,7 +132,9 @@ func (r *MarkdownReader) Read(md string) {
 		switch {
 		case strings.HasPrefix(line, "<!--"):
 			r.readComment(line)
-		case strings.HasPrefix(line, "#"):
+
+		case strings.HasPrefix(line, "# "),
+			strings.HasPrefix(line, "#\t"):
 			r.readH1(line)
 		}
 	}
@@ -188,14 +190,7 @@ func (r *MarkdownReader) readComment(comment string) {
 }
 
 func (r *MarkdownReader) readH1(v string) {
-	v = strings.TrimSpace(v)
-	title, ok := strings.CutPrefix(v, "#")
-	if !ok || (len(title) != 0 &&
-		title[0] != ' ' &&
-		title[0] != '\t') {
-		return
-	}
-	title = strings.TrimSpace(title)
+	title := strings.TrimSpace(v[2:])
 
 	// Closing hashes are heading markers only when preceded by whitespace.
 	withoutHashes := strings.TrimRight(title, "#")
