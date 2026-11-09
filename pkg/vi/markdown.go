@@ -90,8 +90,9 @@ func ParseMarkdown(md string) (string, error) {
 	return b.String(), nil
 }
 
-// MarkdownMeta holds metadata parsed from Markdown HTML comments.
-type MarkdownMeta struct {
+// MarkdownDocument holds document metadata extracted from Markdown source by a
+// [MarkdownReader]. Its field comments describe the supported metadata keys.
+type MarkdownDocument struct {
 	// Title is the value of vi:title.
 	Title string
 
@@ -111,65 +112,79 @@ type MarkdownMeta struct {
 	ModifiedAt time.Time
 }
 
-// ParseMarkdownMeta reads metadata from standalone, single-line HTML comments.
-// Each comment contains a key and a value separated by a space or tab, such as
-// <!-- vi:description A short description -->.
-//
-// See [MarkdownMeta] for supported keys and value formats. Unknown keys,
-// malformed comments, and invalid dates are ignored. Later values override
-// earlier ones.
-func ParseMarkdownMeta(md string) MarkdownMeta {
-	var meta MarkdownMeta
+// MarkdownReader collects metadata from Markdown source into a [MarkdownDocument].
+// Metadata comments use a key and value separated by a space or tab, such as
+// <!-- vi:description A short description -->. See [MarkdownDocument] for
+// supported keys and value formats.
+type MarkdownReader struct {
+	markdown string
+	document MarkdownDocument
+}
+
+func (r *MarkdownReader) Document() MarkdownDocument {
+	return r.document
+}
+
+func (r *MarkdownReader) Read(md string) {
 	for line := range strings.SplitSeq(md, "\n") {
 		line = strings.TrimSpace(line)
+		switch {
+		case strings.HasPrefix(line, "<!--"):
 
-		comment, ok := strings.CutPrefix(line, "<!--")
-		if !ok {
-			continue
+		case strings.HasPrefix(line, "# "):
 		}
-		comment, ok = strings.CutSuffix(comment, "-->")
-		if !ok ||
-			strings.Contains(comment, "<!--") ||
-			strings.Contains(comment, "-->") {
-			continue
-		}
-		comment = strings.TrimSpace(comment)
+	}
+}
 
-		separator := strings.IndexAny(comment, " \t")
-		if separator == -1 {
-			continue
-		}
+func (r *MarkdownReader) readComment(comment string) {
+	comment, ok := strings.CutPrefix(comment, "<!--")
+	if !ok {
+		return
+	}
+	comment, ok = strings.CutSuffix(comment, "-->")
+	if !ok ||
+		strings.Contains(comment, "<!--") ||
+		strings.Contains(comment, "-->") {
+		return
+	}
+	comment = strings.TrimSpace(comment)
 
-		key := comment[:separator]
-		value := strings.TrimSpace(comment[separator+1:])
-		switch key {
-		case "vi:title":
-			meta.Title = value
+	separator := strings.IndexAny(comment, " \t")
+	if separator == -1 {
+		return
+	}
 
-		case "vi:author":
-			meta.Author = value
+	key := comment[:separator]
+	value := strings.TrimSpace(comment[separator+1:])
+	switch key {
+	case "vi:title":
+		r.document.Title = value
 
-		case "vi:description":
-			meta.Description = value
+	case "vi:author":
+		r.document.Author = value
 
-		case "vi:image":
-			meta.Image = value
+	case "vi:description":
+		r.document.Description = value
 
-		case "vi:og-image":
-			meta.OGImage = value
+	case "vi:image":
+		r.document.Image = value
 
-		case "vi:modified-at":
-			for _, layout := range []string{
-				time.RFC3339,
-				time.DateOnly,
-			} {
-				if date, err := time.Parse(layout, value); err == nil {
-					meta.ModifiedAt = date
-					break
-				}
+	case "vi:og-image":
+		r.document.OGImage = value
+
+	case "vi:modified-at":
+		for _, layout := range []string{
+			time.RFC3339,
+			time.DateOnly,
+		} {
+			if date, err := time.Parse(layout, value); err == nil {
+				r.document.ModifiedAt = date
+				break
 			}
 		}
 	}
+}
 
-	return meta
+func (r *MarkdownReader) readH1(v string) {
+
 }

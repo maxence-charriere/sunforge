@@ -17,6 +17,49 @@ func TestParseMarkdownMeta(t *testing.T) {
 			scenario: "empty input",
 		},
 		{
+			scenario: "title from first H1",
+			in:       "## Subtitle\n\n# First title\n\n# Second title",
+			expected: MarkdownMeta{Title: "First title"},
+		},
+		{
+			scenario: "H1 with tabs closing hashes and CRLF",
+			in:       "  #\t你好 世界 ###\r\n",
+			expected: MarkdownMeta{Title: "你好 世界"},
+		},
+		{
+			scenario: "setext H1",
+			in:       "A title\non two lines\n======\n",
+			expected: MarkdownMeta{Title: "A title on two lines"},
+		},
+		{
+			scenario: "H1 inline formatting",
+			in:       "# A **bold** *title* with `code` and [a link](https://example.com)",
+			expected: MarkdownMeta{Title: "A bold title with code and a link"},
+		},
+		{
+			scenario: "H1 entities escapes images and autolinks",
+			in:       "# A &amp; B \\*literal\\* ![sun](/sun.png) <https://example.com>",
+			expected: MarkdownMeta{Title: "A & B *literal* sun https://example.com"},
+		},
+		{
+			scenario: "explicit title after H1 takes precedence",
+			in:       "# Heading\n\n<!-- vi:title Metadata title -->",
+			expected: MarkdownMeta{Title: "Metadata title"},
+		},
+		{
+			scenario: "ignore headings in code and HTML comments",
+			in:       "```md\n# Fenced example\n```\n\n    # Indented example\n\n<!--\n# Comment\n-->\n\n# Real title",
+			expected: MarkdownMeta{Title: "Real title"},
+		},
+		{
+			scenario: "no H1",
+			in:       "#hashtag\n\n## Subtitle\n\nSection\n-------",
+		},
+		{
+			scenario: "empty first H1",
+			in:       "#\n\n# Later title",
+		},
+		{
 			scenario: "description comment",
 			in:       "<!-- vi:description TBH -->",
 			expected: MarkdownMeta{Description: "TBH"},
