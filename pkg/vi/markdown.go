@@ -11,6 +11,8 @@ import (
 	"github.com/yuin/goldmark/v2/renderer/html"
 )
 
+// Markdown is a component that renders Markdown as HTML with vi-markdown styling.
+// Its container can be a div, section, or aside with a custom ID and CSS classes.
 type Markdown interface {
 	app.Composer
 
@@ -20,6 +22,8 @@ type Markdown interface {
 	Class(v ...string) Markdown
 }
 
+// NewMarkdown creates a Markdown component from md, trimming leading and trailing
+// whitespace. The component uses a div container by default.
 func NewMarkdown(md string) Markdown {
 	return &markdown{
 		IRoot:     "div",
