@@ -113,7 +113,8 @@ type MarkdownDocument struct {
 	ModifiedAt time.Time
 }
 
-// MarkdownReader collects metadata from Markdown source into a [MarkdownDocument].
+// MarkdownReader collects metadata from Markdown source into a [MarkdownDocument]
+// returned by Read. Each read starts a new document.
 // Metadata comments use a key and value separated by a space or tab, such as
 // <!-- vi:description A short description -->. See [MarkdownDocument] for
 // supported keys and value formats.
@@ -122,11 +123,8 @@ type MarkdownReader struct {
 	document MarkdownDocument
 }
 
-func (r *MarkdownReader) Document() MarkdownDocument {
-	return r.document
-}
-
-func (r *MarkdownReader) Read(md string) {
+func (r *MarkdownReader) Read(md string) MarkdownDocument {
+	r.document = MarkdownDocument{}
 	for line := range strings.SplitSeq(md, "\n") {
 		line = strings.TrimSpace(line)
 		switch {
@@ -138,6 +136,7 @@ func (r *MarkdownReader) Read(md string) {
 			r.readH1(line)
 		}
 	}
+	return r.document
 }
 
 func (r *MarkdownReader) readComment(comment string) {

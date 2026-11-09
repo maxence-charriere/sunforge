@@ -153,14 +153,23 @@ func TestMarkdownReader(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
 			var reader MarkdownReader
-			reader.Read(test.in)
-			meta := reader.Document()
+			meta := reader.Read(test.in)
 			// Compare timestamps independently of the machine's local timezone.
 			meta.ModifiedAt = meta.ModifiedAt.UTC()
 			test.expected.ModifiedAt = test.expected.ModifiedAt.UTC()
 			require.Equal(t, test.expected, meta)
 		})
 	}
+}
+
+func TestMarkdownReaderReuse(t *testing.T) {
+	var reader MarkdownReader
+	first := reader.Read("# First\n<!-- vi:author Jane Doe -->")
+	second := reader.Read("# Second")
+
+	require.Equal(t, MarkdownDocument{Title: "First", Author: "Jane Doe"}, first)
+	require.Equal(t, MarkdownDocument{Title: "Second"}, second)
+	require.Equal(t, MarkdownDocument{}, reader.Read(""))
 }
 
 func TestParseMarkdown(t *testing.T) {
