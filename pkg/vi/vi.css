@@ -340,7 +340,7 @@ button {
 
   --crucible_content_width: 1fr;
   --crucible_content_columns: 1 / span 1;
-  --crucible_content_padding_h: 12px;
+  --crucible_content_padding_h: 18px;
   --crucible_content_padding_w: 30px;
 
   --crucible_ads_width: 312px;
@@ -412,10 +412,10 @@ button {
   box-sizing: border-box;
   max-width: var(--crucible_pane_width);
   max-height: 100%;
-  padding: var(--crucible_content_padding_h) 0;
+  padding: var(--crucible_content_padding_h) 0 var(--crucible_nav_height);
   display: var(--crucible_pane_display);
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto var(--crucible_nav_height);
+  grid-template-rows: auto auto;
   z-index: var(--crucible_pane_zindex);
   overflow-x: hidden;
   overflow-y: auto;
@@ -619,12 +619,12 @@ button {
 
 .vi-crucible-content>main {
   box-sizing: border-box;
-  height: 100%;
+  min-height: 100%;
 }
 
 .vi-crucible-content>footer {
   box-sizing: border-box;
-  padding: var(--crucible_content_padding_h) 0;
+  padding: var(--crucible_content_padding_h) 0 var(--crucible_content_padding_h);
 }
 
 .vi-crucible-content>footer>ul {
@@ -1994,7 +1994,7 @@ div[data-vi="svg"] {
 **
 */
 :root {
-  --banner_height: 30%;
+  --banner_height: 30vh;
   --banner_min_height: 300px;
   --banner_padding_w: var(--crucible_content_padding_w);
   --banner_padding_h: var(--crucible_content_padding_h);
