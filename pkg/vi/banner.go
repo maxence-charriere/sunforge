@@ -140,23 +140,5 @@ func (b *banner) Render() app.UI {
 						)
 					}),
 				),
-
-			// app.Div().
-			// 	Class("vi-banner-content").
-			// 	Body(
-			// 		app.H1().Text(b.ITitle),
-			// 		app.If(len(b.IContent) != 0, func() app.UI {
-			// 			return app.Div().Body(b.IContent...)
-			// 		}),
-			// 		app.If(len(b.INav) != 0, func() app.UI {
-			// 			return NewBox().
-			// 				AsUl().
-			// 				WithColumns().
-			// 				WithoutBackground().
-			// 				WithoutPadding().
-			// 				Class("p").
-			// 				Content(b.INav...)
-			// 		}),
-			// 	),
 		)
 }
