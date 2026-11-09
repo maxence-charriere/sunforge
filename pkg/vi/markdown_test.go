@@ -7,72 +7,76 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseMarkdownMeta(t *testing.T) {
+func TestMarkdownReader(t *testing.T) {
 	tests := []struct {
 		scenario string
 		in       string
-		expected MarkdownMeta
+		expected MarkdownDocument
 	}{
 		{
 			scenario: "empty input",
 		},
 		{
-			scenario: "title from first H1",
+			scenario: "title from last H1",
 			in:       "## Subtitle\n\n# First title\n\n# Second title",
-			expected: MarkdownMeta{Title: "First title"},
+			expected: MarkdownDocument{Title: "Second title"},
 		},
 		{
 			scenario: "H1 with tabs closing hashes and CRLF",
 			in:       "  #\t你好 世界 ###\r\n",
-			expected: MarkdownMeta{Title: "你好 世界"},
+			expected: MarkdownDocument{Title: "你好 世界"},
 		},
 		{
-			scenario: "setext H1",
+			scenario: "setext headings are not read as H1",
 			in:       "A title\non two lines\n======\n",
-			expected: MarkdownMeta{Title: "A title on two lines"},
 		},
 		{
 			scenario: "H1 inline formatting",
 			in:       "# A **bold** *title* with `code` and [a link](https://example.com)",
-			expected: MarkdownMeta{Title: "A bold title with code and a link"},
+			expected: MarkdownDocument{Title: "A **bold** *title* with `code` and [a link](https://example.com)"},
 		},
 		{
 			scenario: "H1 entities escapes images and autolinks",
 			in:       "# A &amp; B \\*literal\\* ![sun](/sun.png) <https://example.com>",
-			expected: MarkdownMeta{Title: "A & B *literal* sun https://example.com"},
+			expected: MarkdownDocument{Title: "A &amp; B \\*literal\\* ![sun](/sun.png) <https://example.com>"},
 		},
 		{
-			scenario: "explicit title after H1 takes precedence",
+			scenario: "later metadata title wins",
 			in:       "# Heading\n\n<!-- vi:title Metadata title -->",
-			expected: MarkdownMeta{Title: "Metadata title"},
+			expected: MarkdownDocument{Title: "Metadata title"},
 		},
 		{
-			scenario: "ignore headings in code and HTML comments",
-			in:       "```md\n# Fenced example\n```\n\n    # Indented example\n\n<!--\n# Comment\n-->\n\n# Real title",
-			expected: MarkdownMeta{Title: "Real title"},
+			scenario: "later H1 title wins",
+			in:       "<!-- vi:title Metadata title -->\n\n# Heading",
+			expected: MarkdownDocument{Title: "Heading"},
+		},
+		{
+			scenario: "hash attached to title is preserved",
+			in:       "# Learn C#",
+			expected: MarkdownDocument{Title: "Learn C#"},
 		},
 		{
 			scenario: "no H1",
 			in:       "#hashtag\n\n## Subtitle\n\nSection\n-------",
 		},
 		{
-			scenario: "empty first H1",
-			in:       "#\n\n# Later title",
+			scenario: "empty H1 clears title",
+			in:       "# Earlier title\n\n#",
 		},
 		{
 			scenario: "description comment",
 			in:       "<!-- vi:description TBH -->",
-			expected: MarkdownMeta{Description: "TBH"},
+			expected: MarkdownDocument{Description: "TBH"},
 		},
 		{
 			scenario: "author with whitespace and unicode",
 			in:       "<!-- vi:author\t  Renée Chen 陳 \t-->",
-			expected: MarkdownMeta{Author: "Renée Chen 陳"},
+			expected: MarkdownDocument{Author: "Renée Chen 陳"},
 		},
 		{
 			scenario: "later author wins",
 			in:       "<!-- vi:author First Author -->\n<!-- vi:author Second Author -->",
-			expected: MarkdownMeta{Author: "Second Author"},
+			expected: MarkdownDocument{Author: "Second Author"},
 		},
 		{
 			scenario: "all fields mixed with markdown",
@@ -82,8 +86,8 @@ func TestParseMarkdownMeta(t *testing.T) {
 				"<!-- vi:image /image.png -->\n" +
 				"<!-- vi:og-image https://example.com/social.png -->\n" +
 				"<!-- vi:modified-at 2026-11-09T12:30:00+08:00 -->",
-			expected: MarkdownMeta{
-				Title:       "A title",
+			expected: MarkdownDocument{
+				Title:       "Heading",
 				Author:      "Jane Doe",
 				Description: "A longer description.",
 				Image:       "/image.png",
@@ -94,32 +98,32 @@ func TestParseMarkdownMeta(t *testing.T) {
 		{
 			scenario: "tabs padding and CRLF",
 			in:       " \t<!--\tvi:title\t  A  title\twith spaces \t--> \r\n<!--vi:description TBH-->",
-			expected: MarkdownMeta{Title: "A  title\twith spaces", Description: "TBH"},
+			expected: MarkdownDocument{Title: "A  title\twith spaces", Description: "TBH"},
 		},
 		{
 			scenario: "preserve punctuation and unicode",
 			in:       "<!-- vi:description 你好: **world** & <b>hello</b> -->",
-			expected: MarkdownMeta{Description: "你好: **world** & <b>hello</b>"},
+			expected: MarkdownDocument{Description: "你好: **world** & <b>hello</b>"},
 		},
 		{
 			scenario: "later value wins",
 			in:       "<!-- vi:title First -->\n<!-- vi:title Second -->",
-			expected: MarkdownMeta{Title: "Second"},
+			expected: MarkdownDocument{Title: "Second"},
 		},
 		{
 			scenario: "date only",
 			in:       "<!-- vi:modified-at 2026-11-09 -->",
-			expected: MarkdownMeta{ModifiedAt: time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)},
+			expected: MarkdownDocument{ModifiedAt: time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)},
 		},
 		{
 			scenario: "invalid date is ignored",
 			in:       "<!-- vi:modified-at yesterday -->\n<!-- vi:title Still parsed -->",
-			expected: MarkdownMeta{Title: "Still parsed"},
+			expected: MarkdownDocument{Title: "Still parsed"},
 		},
 		{
 			scenario: "invalid date preserves previous value",
 			in:       "<!-- vi:modified-at 2026-11-09 -->\n<!-- vi:modified-at 2026-02-30 -->",
-			expected: MarkdownMeta{ModifiedAt: time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)},
+			expected: MarkdownDocument{ModifiedAt: time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)},
 		},
 		{
 			scenario: "unknown keys and ordinary comments",
@@ -143,7 +147,9 @@ func TestParseMarkdownMeta(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
-			meta := ParseMarkdownMeta(test.in)
+			var reader MarkdownReader
+			reader.Read(test.in)
+			meta := reader.Document()
 			// Compare timestamps independently of the machine's local timezone.
 			meta.ModifiedAt = meta.ModifiedAt.UTC()
 			test.expected.ModifiedAt = test.expected.ModifiedAt.UTC()

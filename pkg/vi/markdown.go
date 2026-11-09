@@ -93,7 +93,8 @@ func ParseMarkdown(md string) (string, error) {
 // MarkdownDocument holds document metadata extracted from Markdown source by a
 // [MarkdownReader]. Its field comments describe the supported metadata keys.
 type MarkdownDocument struct {
-	// Title is the value of vi:title.
+	// Title is the text of a # heading or the value of vi:title, whichever occurs
+	// last. Inline Markdown is preserved.
 	Title string
 
 	// Author is the value of vi:author.
@@ -130,8 +131,9 @@ func (r *MarkdownReader) Read(md string) {
 		line = strings.TrimSpace(line)
 		switch {
 		case strings.HasPrefix(line, "<!--"):
-
-		case strings.HasPrefix(line, "# "):
+			r.readComment(line)
+		case strings.HasPrefix(line, "#"):
+			r.readH1(line)
 		}
 	}
 }
@@ -186,5 +188,21 @@ func (r *MarkdownReader) readComment(comment string) {
 }
 
 func (r *MarkdownReader) readH1(v string) {
+	v = strings.TrimSpace(v)
+	title, ok := strings.CutPrefix(v, "#")
+	if !ok || (len(title) != 0 &&
+		title[0] != ' ' &&
+		title[0] != '\t') {
+		return
+	}
+	title = strings.TrimSpace(title)
 
+	// Closing hashes are heading markers only when preceded by whitespace.
+	withoutHashes := strings.TrimRight(title, "#")
+	if withoutHashes == "" ||
+		strings.HasSuffix(withoutHashes, " ") ||
+		strings.HasSuffix(withoutHashes, "\t") {
+		title = strings.TrimSpace(withoutHashes)
+	}
+	r.document.Title = title
 }
