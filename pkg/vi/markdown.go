@@ -86,21 +86,34 @@ func ParseMarkdown(md string) (string, error) {
 	return b.String(), nil
 }
 
+// MarkdownMeta holds metadata parsed from Markdown HTML comments.
 type MarkdownMeta struct {
-	Title       string
-	Author      string
+	// Title is the value of vi:title.
+	Title string
+
+	// Author is the value of vi:author.
+	Author string
+
+	// Description is the value of vi:description.
 	Description string
-	Image       string
-	OGImage     string
-	ModifiedAt  time.Time
+
+	// Image is the value of vi:image.
+	Image string
+
+	// OGImage is the value of vi:og-image.
+	OGImage string
+
+	// ModifiedAt is the value of vi:modified-at, parsed as RFC3339 or YYYY-MM-DD.
+	ModifiedAt time.Time
 }
 
 // ParseMarkdownMeta reads metadata from standalone, single-line HTML comments.
 // Each comment contains a key and a value separated by a space or tab, such as
-// <!-- vi:description A short description -->. Supported keys are vi:title,
-// vi:author, vi:description, vi:image, vi:og-image, and vi:modified-at. Dates must
-// use RFC3339 or YYYY-MM-DD format. Unknown keys, malformed comments, and invalid
-// dates are ignored. Later values override earlier ones.
+// <!-- vi:description A short description -->.
+//
+// See [MarkdownMeta] for supported keys and value formats. Unknown keys,
+// malformed comments, and invalid dates are ignored. Later values override
+// earlier ones.
 func ParseMarkdownMeta(md string) MarkdownMeta {
 	var meta MarkdownMeta
 	for line := range strings.SplitSeq(md, "\n") {
