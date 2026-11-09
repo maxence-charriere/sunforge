@@ -88,12 +88,71 @@ func ParseMarkdown(md string) (string, error) {
 
 type MarkdownMeta struct {
 	Title       string
+	Author      string
 	Description string
 	Image       string
 	OGImage     string
-	UpdatedAt   time.Time
+	ModifiedAt  time.Time
 }
 
+// ParseMarkdownMeta reads metadata from standalone, single-line HTML comments.
+// Each comment contains a key and a value separated by a space or tab, such as
+// <!-- vi:description A short description -->. Supported keys are vi:title,
+// vi:author, vi:description, vi:image, vi:og-image, and vi:modified-at. Dates must
+// use RFC3339 or YYYY-MM-DD format. Unknown keys, malformed comments, and invalid
+// dates are ignored. Later values override earlier ones.
 func ParseMarkdownMeta(md string) MarkdownMeta {
-	return MarkdownMeta{}
+	var meta MarkdownMeta
+	for line := range strings.SplitSeq(md, "\n") {
+		line = strings.TrimSpace(line)
+
+		comment, ok := strings.CutPrefix(line, "<!--")
+		if !ok {
+			continue
+		}
+		comment, ok = strings.CutSuffix(comment, "-->")
+		if !ok ||
+			strings.Contains(comment, "<!--") ||
+			strings.Contains(comment, "-->") {
+			continue
+		}
+		comment = strings.TrimSpace(comment)
+
+		separator := strings.IndexAny(comment, " \t")
+		if separator == -1 {
+			continue
+		}
+
+		key := comment[:separator]
+		value := strings.TrimSpace(comment[separator+1:])
+		switch key {
+		case "vi:title":
+			meta.Title = value
+
+		case "vi:author":
+			meta.Author = value
+
+		case "vi:description":
+			meta.Description = value
+
+		case "vi:image":
+			meta.Image = value
+
+		case "vi:og-image":
+			meta.OGImage = value
+
+		case "vi:modified-at":
+			for _, layout := range []string{
+				time.RFC3339,
+				time.DateOnly,
+			} {
+				if date, err := time.Parse(layout, value); err == nil {
+					meta.ModifiedAt = date
+					break
+				}
+			}
+		}
+	}
+
+	return meta
 }
