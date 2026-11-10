@@ -12,6 +12,9 @@ const (
 	crucibleContentOnlyWidth = 1302
 )
 
+// Crucible is a responsive application layout with branding, menus, navigation,
+// main content, a footer, optional ads, and notifications. It supports popovers,
+// intersection observers, and progressive web app installation and update prompts.
 type Crucible interface {
 	app.Composer
 
@@ -29,6 +32,9 @@ type Crucible interface {
 	NotificationsBadge(bool) Crucible
 }
 
+// NewCrucible creates a responsive application layout for the named application.
+// The name is used in the branding, installation and update prompts, and footer
+// copyright notice, which uses the year in which the layout is created.
 func NewCrucible(appName string) Crucible {
 	return &crucible{
 		IAppName:    appName,
@@ -145,6 +151,10 @@ func (c *crucible) OnMount(ctx app.Context) {
 
 func (c *crucible) OnNav(ctx app.Context) {
 	c.closeOverlay(ctx, app.Event{})
+
+	if ctx.Page().URL().Fragment == "" {
+		ScrollToTop(ctx)
+	}
 }
 
 func (c *crucible) OnAppInstallChange(ctx app.Context) {
