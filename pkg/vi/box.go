@@ -26,7 +26,6 @@ type Box interface {
 	WithBackgroundImagef(format string, v ...any) Box
 	WithMediaBackgroundImage(v string) Box
 	WithMediaBackgroundImagef(format string, v ...any) Box
-	WithMarkdown() Box
 	WithoutBackground() Box
 	WithoutPadding() Box
 	WithoutTopPadding() Box
@@ -65,7 +64,6 @@ type box struct {
 	IWithColumns              bool
 	IWithHorizontalCentering  bool
 	IWithMediaBackgroundImage bool
-	IWithMarkdown             bool
 	IWithoutBackground        bool
 	IWithoutPadding           bool
 	IWithoutTopPadding        bool
@@ -189,11 +187,6 @@ func (b *box) WithMediaBackgroundImagef(format string, v ...any) Box {
 	return b.WithMediaBackgroundImage(fmt.Sprintf(format, v...))
 }
 
-func (b *box) WithMarkdown() Box {
-	b.IWithMarkdown = true
-	return b
-}
-
 func (b *box) WithoutSelection() Box {
 	b.IWithoutSelection = true
 	return b
@@ -294,7 +287,6 @@ func (b *box) Render() app.UI {
 		Class(IfTrue(b.IWithGap, "vi-box-with-gap")).
 		Class(IfTrue(b.IWithColumns, "vi-box-with-columns")).
 		Class(IfTrue(b.IWithHorizontalCentering, "vi-box-with-horizontal-centering")).
-		Class(IfTrue(b.IWithMarkdown, "vi-box-with-markdown")).
 		Class(IfTrue(b.IBackgroundImageURL != "", "vi-box-with-background-img")).
 		Class(IfTrue(b.IWithMediaBackgroundImage, "vi-box-with-media-background-img")).
 		Class(IfTrue(b.IWithoutBackground, "vi-box-without-background")).

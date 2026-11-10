@@ -151,6 +151,10 @@ func (c *crucible) OnMount(ctx app.Context) {
 
 func (c *crucible) OnNav(ctx app.Context) {
 	c.closeOverlay(ctx, app.Event{})
+
+	if ctx.Page().URL().Fragment == "" {
+		ScrollToTop(ctx)
+	}
 }
 
 func (c *crucible) OnAppInstallChange(ctx app.Context) {
