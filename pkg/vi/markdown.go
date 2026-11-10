@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/yuin/goldmark/v2/ast"
 	"github.com/yuin/goldmark/v2/parser"
 	"github.com/yuin/goldmark/v2/renderer/html"
 )
@@ -90,10 +91,10 @@ func ParseMarkdown(md string) (string, error) {
 	return b.String(), nil
 }
 
-// MarkdownDocument holds document metadata extracted from Markdown source by a
+// MarkdownDocument holds metadata and content extracted from Markdown source by a
 // [MarkdownReader]. Its field comments describe the supported metadata keys.
 type MarkdownDocument struct {
-	// Title is the text of a # heading or the value of vi:title, whichever occurs
+	// Title is the text of a top-level H1 or the value of vi:title, whichever occurs
 	// last. Inline Markdown is preserved.
 	Title string
 
@@ -112,67 +113,95 @@ type MarkdownDocument struct {
 	// ModifiedAt is the value of vi:modified-at, parsed as RFC3339 or YYYY-MM-DD.
 	ModifiedAt time.Time
 
+	// Intro is the original Markdown after the first top-level H1 and before
+	// the first H2, or EOF. It is empty when no H1 precedes the first H2.
 	Intro string
 
+	// Sections contains each top-level H2 and the Markdown up to the next H2
+	// or EOF. Leading and trailing whitespace is trimmed from each section.
 	Sections []string
 }
 
-// MarkdownReader collects metadata from Markdown source into a [MarkdownDocument]
-// returned by Read. Each read starts a new document.
+// MarkdownReader uses Goldmark to collect top-level headings, metadata comments,
+// and content into a [MarkdownDocument] returned by Read. Both ATX and Setext
+// headings are supported. Each read starts a new document.
 // Metadata comments use a key and value separated by a space or tab, such as
 // <!-- vi:description A short description -->. See [MarkdownDocument] for
 // supported keys and value formats.
 type MarkdownReader struct {
-	markdown string
 	document MarkdownDocument
 }
 
 func (r *MarkdownReader) Read(md string) MarkdownDocument {
 	r.document = MarkdownDocument{}
-	position := 0
+	source := []byte(md)
+	doc := parser.New().Parse(source)
 	introStart := -1
-	introEnd := -1
+	introEnd := len(md)
+	sectionStart := -1
 
-	for line := range strings.SplitSeq(md, "\n") {
-		endline := position + len(line) + 1
-		line = strings.TrimSpace(line)
+	// Only document-level blocks define metadata and section boundaries.
+	// Goldmark keeps code, HTML, lists, and blockquotes in their own nodes.
+	for node := range doc.Children() {
+		switch node := node.(type) {
+		case *ast.HTMLBlock:
+			r.readComment(node, source)
 
-		switch {
-		// Comment
-		case strings.HasPrefix(line, "<!--"):
-			r.readComment(line)
+		case *ast.Heading:
+			switch node.Level {
+			case 1:
+				r.readH1(node, source)
+				if introStart < 0 && sectionStart < 0 {
+					introStart = markdownHeadingEnd(md, node)
+				}
 
-		// h1
-		case strings.HasPrefix(line, "# "),
-			strings.HasPrefix(line, "#\t"):
-			r.readH1(line)
-			if introStart < 0 && introEnd < 0 {
-				introStart = endline
-			}
-
-		// h2
-		case strings.HasPrefix(line, "## "),
-			strings.HasPrefix(line, "##\t"):
-			r.readSection(md[position:])
-			if introEnd < 0 {
-				introEnd = position
+			case 2:
+				// Include the heading's original indentation in the source slice.
+				start := strings.LastIndexByte(md[:node.Pos()], '\n') + 1
+				if sectionStart < 0 {
+					introEnd = start
+				} else {
+					r.readSection(md[sectionStart:start])
+				}
+				sectionStart = start
 			}
 		}
-
-		position = endline
 	}
 
-	if introEnd < 0 {
-		introEnd = len(md)
-	}
-	if introStart > 0 && introEnd > introStart {
+	if introStart >= 0 && introStart < introEnd {
 		r.document.Intro = md[introStart:introEnd]
 	}
-
+	if sectionStart >= 0 {
+		r.readSection(md[sectionStart:])
+	}
 	return r.document
 }
 
-func (r *MarkdownReader) readComment(comment string) {
+// markdownHeadingEnd returns the position after the heading's final source line.
+func markdownHeadingEnd(md string, heading *ast.Heading) int {
+	position := heading.Pos()
+	if segments := heading.Source(); len(segments) != 0 {
+		position = segments[len(segments)-1].Start
+	}
+	lines := 1
+	if heading.HeadingKind == ast.HeadingKindSetext {
+		lines++ // Include the underline after the last line of heading text.
+	}
+	for range lines {
+		end := strings.IndexByte(md[position:], '\n')
+		if end < 0 {
+			return len(md)
+		}
+		position += end + 1
+	}
+	return position
+}
+
+func (r *MarkdownReader) readComment(node *ast.HTMLBlock, source []byte) {
+	comment := strings.TrimSpace(node.Value.Str(source))
+	if strings.ContainsAny(comment, "\r\n") {
+		return
+	}
 	comment, ok := strings.CutPrefix(comment, "<!--")
 	if !ok {
 		return
@@ -221,32 +250,14 @@ func (r *MarkdownReader) readComment(comment string) {
 	}
 }
 
-func (r *MarkdownReader) readH1(v string) {
-	title := strings.TrimSpace(v[2:])
-
-	// Closing hashes are heading markers only when preceded by whitespace.
-	withoutHashes := strings.TrimRight(title, "#")
-	if withoutHashes == "" ||
-		strings.HasSuffix(withoutHashes, " ") ||
-		strings.HasSuffix(withoutHashes, "\t") {
-		title = strings.TrimSpace(withoutHashes)
+func (r *MarkdownReader) readH1(heading *ast.Heading, source []byte) {
+	var title strings.Builder
+	for _, segment := range heading.Source() {
+		title.Write(segment.Bytes(source))
 	}
-	r.document.Title = title
+	r.document.Title = strings.TrimSpace(title.String())
 }
 
 func (r *MarkdownReader) readSection(v string) {
-	nextSectionIndex := strings.Index(v, "\n## ")
-	if nextSectionTabIndex := strings.Index(v, "\n##\t"); nextSectionTabIndex >= 0 &&
-		(nextSectionIndex < 0 || nextSectionTabIndex < nextSectionIndex) {
-		nextSectionIndex = nextSectionTabIndex
-	}
-	if nextSectionIndex < 0 {
-		nextSectionIndex = len(v)
-	}
-
-	section := strings.TrimSpace(v[:nextSectionIndex])
-	if section == "" {
-		return
-	}
-	r.document.Sections = append(r.document.Sections, section)
+	r.document.Sections = append(r.document.Sections, strings.TrimSpace(v))
 }

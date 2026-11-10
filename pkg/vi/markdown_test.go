@@ -30,8 +30,9 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{Title: "你好 世界"},
 		},
 		{
-			scenario: "setext headings are not read as H1",
+			scenario: "setext H1 preserves multiline title",
 			in:       "A title\non two lines\n======\n",
+			expected: MarkdownDocument{Title: "A title\non two lines"},
 		},
 		{
 			scenario: "H1 inline formatting",
@@ -64,7 +65,7 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "no H1",
 			in:       "#hashtag\n\n## Subtitle\n\nSection\n-------",
-			expected: MarkdownDocument{Sections: []string{"## Subtitle\n\nSection\n-------"}},
+			expected: MarkdownDocument{Sections: []string{"## Subtitle", "Section\n-------"}},
 		},
 		{
 			scenario: "empty H1 clears title",
@@ -72,10 +73,9 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{Intro: "\n# ###"},
 		},
 		{
-			scenario: "bare hashes and other headings preserve title",
+			scenario: "bare H1 clears title",
 			in:       "# Earlier title\n\n#\n# \n#\t\n#hashtag\n## Subtitle\n##\tSubtitle",
 			expected: MarkdownDocument{
-				Title:    "Earlier title",
 				Intro:    "\n#\n# \n#\t\n#hashtag\n",
 				Sections: []string{"## Subtitle", "##\tSubtitle"},
 			},
@@ -119,8 +119,115 @@ func TestMarkdownReader(t *testing.T) {
 		},
 		{
 			scenario: "tabs padding and CRLF",
-			in:       " \t<!--\tvi:title\t  A  title\twith spaces \t--> \r\n<!--vi:description TBH-->",
+			in:       "   <!--\tvi:title\t  A  title\twith spaces \t--> \r\n<!--vi:description TBH-->",
 			expected: MarkdownDocument{Title: "A  title\twith spaces", Description: "TBH"},
+		},
+		{
+			scenario: "tab indented metadata is code",
+			in:       " \t<!-- vi:title Ignored -->\r\n",
+		},
+		{
+			scenario: "intro and multiple sections preserve Markdown",
+			in:       "# Title\n\nIntro  \nnext line.\n\n## One\n\n- item\n  - nested\n### Details\nbody\n\n## Two\nLast body\n",
+			expected: MarkdownDocument{
+				Title: "Title",
+				Intro: "\nIntro  \nnext line.\n\n",
+				Sections: []string{
+					"## One\n\n- item\n  - nested\n### Details\nbody",
+					"## Two\nLast body",
+				},
+			},
+		},
+		{
+			scenario: "indented and tab separated sections",
+			in:       "# Title\nIntro\n   ## One\nBody one\n  ##\tTwo\nBody two\n## Three",
+			expected: MarkdownDocument{
+				Title:    "Title",
+				Intro:    "Intro\n",
+				Sections: []string{"## One\nBody one", "##\tTwo\nBody two", "## Three"},
+			},
+		},
+		{
+			scenario: "Setext boundaries with CRLF",
+			in:       "  Title\r\n  ====\r\n\r\nIntro\r\n\r\nFirst\r\nsection\r\n---\r\nBody\r\n\r\nSecond\r\n---",
+			expected: MarkdownDocument{
+				Title:    "Title",
+				Intro:    "\r\nIntro\r\n\r\n",
+				Sections: []string{"First\r\nsection\r\n---\r\nBody", "Second\r\n---"},
+			},
+		},
+		{
+			scenario: "empty headings and consecutive sections",
+			in:       "#\n##\n## Next\n##",
+			expected: MarkdownDocument{Sections: []string{"##", "## Next", "##"}},
+		},
+		{
+			scenario: "intro without H2 or final newline",
+			in:       "# Title\nIntro",
+			expected: MarkdownDocument{Title: "Title", Intro: "Intro"},
+		},
+		{
+			scenario: "later H1 does not discard intro",
+			in:       "# First\nIntro\n## Section\n# Later\nBody",
+			expected: MarkdownDocument{
+				Title: "Later", Intro: "Intro\n", Sections: []string{"## Section\n# Later\nBody"},
+			},
+		},
+		{
+			scenario: "backtick fence ignores shorter fences and metadata",
+			in:       "# Title\n````md\n# Fake\n## Fake\n<!-- vi:author Ignored -->\n```\n## Still code\n````\n## Real\nBody",
+			expected: MarkdownDocument{
+				Title:    "Title",
+				Intro:    "````md\n# Fake\n## Fake\n<!-- vi:author Ignored -->\n```\n## Still code\n````\n",
+				Sections: []string{"## Real\nBody"},
+			},
+		},
+		{
+			scenario: "tilde fence within section",
+			in:       "# Title\n## One\n  ~~~md\n## Fake\n<!-- vi:title Ignored -->\n ~~~\n## Two",
+			expected: MarkdownDocument{
+				Title:    "Title",
+				Sections: []string{"## One\n  ~~~md\n## Fake\n<!-- vi:title Ignored -->\n ~~~", "## Two"},
+			},
+		},
+		{
+			scenario: "unclosed fence extends to EOF",
+			in:       "# Title\n```\n## Fake\n    ```\n# Also fake",
+			expected: MarkdownDocument{Title: "Title", Intro: "```\n## Fake\n    ```\n# Also fake"},
+		},
+		{
+			scenario: "indented code and indented fences stay content",
+			in:       "# Title\n\n    ```\n      # Fake\n    ## Fake\n    <!-- vi:author Ignored -->\n\n## Real",
+			expected: MarkdownDocument{
+				Title:    "Title",
+				Intro:    "\n    ```\n      # Fake\n    ## Fake\n    <!-- vi:author Ignored -->\n\n",
+				Sections: []string{"## Real"},
+			},
+		},
+		{
+			scenario: "headings inside multiline comment",
+			in:       "# Title\n<!--\n# Fake\n## Fake\n-->\n## Real",
+			expected: MarkdownDocument{
+				Title: "Title", Intro: "<!--\n# Fake\n## Fake\n-->\n", Sections: []string{"## Real"},
+			},
+		},
+		{
+			scenario: "headings and metadata inside HTML block",
+			in:       "# Title\n<div>\n# Fake\n## Fake\n<!-- vi:author Ignored -->\n</div>\n\n## Real",
+			expected: MarkdownDocument{
+				Title:    "Title",
+				Intro:    "<div>\n# Fake\n## Fake\n<!-- vi:author Ignored -->\n</div>\n\n",
+				Sections: []string{"## Real"},
+			},
+		},
+		{
+			scenario: "nested headings are not document headings",
+			in:       "# Title\n> # Quoted\n> ## Quoted section\n> <!-- vi:author Ignored -->\n\n- ## Listed section\n\n## Real",
+			expected: MarkdownDocument{
+				Title:    "Title",
+				Intro:    "> # Quoted\n> ## Quoted section\n> <!-- vi:author Ignored -->\n\n- ## Listed section\n\n",
+				Sections: []string{"## Real"},
+			},
 		},
 		{
 			scenario: "preserve punctuation and unicode",
@@ -181,16 +288,42 @@ func TestMarkdownReader(t *testing.T) {
 
 func TestMarkdownReaderReuse(t *testing.T) {
 	var reader MarkdownReader
-	first := reader.Read("# First\n<!-- vi:author Jane Doe -->")
+	first := reader.Read("# First\n<!-- vi:author Jane Doe -->\n## One\nBody")
 	second := reader.Read("# Second")
+	third := reader.Read("## Other")
 
 	require.Equal(t, MarkdownDocument{
-		Title:  "First",
-		Author: "Jane Doe",
-		Intro:  "<!-- vi:author Jane Doe -->",
+		Title:    "First",
+		Author:   "Jane Doe",
+		Intro:    "<!-- vi:author Jane Doe -->\n",
+		Sections: []string{"## One\nBody"},
 	}, first)
 	require.Equal(t, MarkdownDocument{Title: "Second"}, second)
+	require.Equal(t, MarkdownDocument{Sections: []string{"## Other"}}, third)
 	require.Equal(t, MarkdownDocument{}, reader.Read(""))
+}
+
+func TestMarkdownReaderLineEndings(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		ending string
+		tail   string
+	}{
+		{name: "LF", ending: "\n"},
+		{name: "LF with final newline", ending: "\n", tail: "\n"},
+		{name: "CRLF", ending: "\r\n"},
+		{name: "CRLF with final newline", ending: "\r\n", tail: "\r\n"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var reader MarkdownReader
+			doc := reader.Read("# Title" + test.ending + "Intro" + test.ending + "## Section" + test.ending + "Body" + test.tail)
+			require.Equal(t, MarkdownDocument{
+				Title:    "Title",
+				Intro:    "Intro" + test.ending,
+				Sections: []string{"## Section" + test.ending + "Body"},
+			}, doc)
+		})
+	}
 }
 
 func TestParseMarkdown(t *testing.T) {
