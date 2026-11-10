@@ -111,6 +111,10 @@ type MarkdownDocument struct {
 
 	// ModifiedAt is the value of vi:modified-at, parsed as RFC3339 or YYYY-MM-DD.
 	ModifiedAt time.Time
+
+	Intro string
+
+	Sections []string
 }
 
 // MarkdownReader collects metadata from Markdown source into a [MarkdownDocument]
@@ -125,17 +129,46 @@ type MarkdownReader struct {
 
 func (r *MarkdownReader) Read(md string) MarkdownDocument {
 	r.document = MarkdownDocument{}
+	position := 0
+	introStart := -1
+	introEnd := -1
+
 	for line := range strings.SplitSeq(md, "\n") {
+		endline := position + len(line) + 1
 		line = strings.TrimSpace(line)
+
 		switch {
+		// Comment
 		case strings.HasPrefix(line, "<!--"):
 			r.readComment(line)
 
+		// h1
 		case strings.HasPrefix(line, "# "),
 			strings.HasPrefix(line, "#\t"):
 			r.readH1(line)
+			if introStart < 0 && introEnd < 0 {
+				introStart = endline
+			}
+
+		// h2
+		case strings.HasPrefix(line, "## "),
+			strings.HasPrefix(line, "##\t"):
+			r.readSection(md[position:])
+			if introEnd < 0 {
+				introEnd = position
+			}
 		}
+
+		position = endline
 	}
+
+	if introEnd < 0 {
+		introEnd = len(md)
+	}
+	if introStart > 0 && introEnd > introStart {
+		r.document.Intro = md[introStart:introEnd]
+	}
+
 	return r.document
 }
 
@@ -199,4 +232,21 @@ func (r *MarkdownReader) readH1(v string) {
 		title = strings.TrimSpace(withoutHashes)
 	}
 	r.document.Title = title
+}
+
+func (r *MarkdownReader) readSection(v string) {
+	nextSectionIndex := strings.Index(v, "\n## ")
+	if nextSectionTabIndex := strings.Index(v, "\n##\t"); nextSectionTabIndex >= 0 &&
+		(nextSectionIndex < 0 || nextSectionTabIndex < nextSectionIndex) {
+		nextSectionIndex = nextSectionTabIndex
+	}
+	if nextSectionIndex < 0 {
+		nextSectionIndex = len(v)
+	}
+
+	section := strings.TrimSpace(v[:nextSectionIndex])
+	if section == "" {
+		return
+	}
+	r.document.Sections = append(r.document.Sections, section)
 }

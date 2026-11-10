@@ -19,7 +19,10 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "title from last H1",
 			in:       "## Subtitle\n\n# First title\n\n# Second title",
-			expected: MarkdownDocument{Title: "Second title"},
+			expected: MarkdownDocument{
+				Title:    "Second title",
+				Sections: []string{"## Subtitle\n\n# First title\n\n# Second title"},
+			},
 		},
 		{
 			scenario: "H1 with tabs closing hashes and CRLF",
@@ -43,7 +46,10 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "later metadata title wins",
 			in:       "# Heading\n\n<!-- vi:title Metadata title -->",
-			expected: MarkdownDocument{Title: "Metadata title"},
+			expected: MarkdownDocument{
+				Title: "Metadata title",
+				Intro: "\n<!-- vi:title Metadata title -->",
+			},
 		},
 		{
 			scenario: "later H1 title wins",
@@ -58,15 +64,21 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "no H1",
 			in:       "#hashtag\n\n## Subtitle\n\nSection\n-------",
+			expected: MarkdownDocument{Sections: []string{"## Subtitle\n\nSection\n-------"}},
 		},
 		{
 			scenario: "empty H1 clears title",
 			in:       "# Earlier title\n\n# ###",
+			expected: MarkdownDocument{Intro: "\n# ###"},
 		},
 		{
 			scenario: "bare hashes and other headings preserve title",
 			in:       "# Earlier title\n\n#\n# \n#\t\n#hashtag\n## Subtitle\n##\tSubtitle",
-			expected: MarkdownDocument{Title: "Earlier title"},
+			expected: MarkdownDocument{
+				Title:    "Earlier title",
+				Intro:    "\n#\n# \n#\t\n#hashtag\n",
+				Sections: []string{"## Subtitle", "##\tSubtitle"},
+			},
 		},
 		{
 			scenario: "description comment",
@@ -98,6 +110,11 @@ func TestMarkdownReader(t *testing.T) {
 				Image:       "/image.png",
 				OGImage:     "https://example.com/social.png",
 				ModifiedAt:  time.Date(2026, 11, 9, 12, 30, 0, 0, time.FixedZone("", 8*60*60)),
+				Intro: "\n<!-- vi:author Jane Doe -->\n" +
+					"<!-- vi:description A longer description. -->\nSome content.\n" +
+					"<!-- vi:image /image.png -->\n" +
+					"<!-- vi:og-image https://example.com/social.png -->\n" +
+					"<!-- vi:modified-at 2026-11-09T12:30:00+08:00 -->",
 			},
 		},
 		{
@@ -167,7 +184,11 @@ func TestMarkdownReaderReuse(t *testing.T) {
 	first := reader.Read("# First\n<!-- vi:author Jane Doe -->")
 	second := reader.Read("# Second")
 
-	require.Equal(t, MarkdownDocument{Title: "First", Author: "Jane Doe"}, first)
+	require.Equal(t, MarkdownDocument{
+		Title:  "First",
+		Author: "Jane Doe",
+		Intro:  "<!-- vi:author Jane Doe -->",
+	}, first)
 	require.Equal(t, MarkdownDocument{Title: "Second"}, second)
 	require.Equal(t, MarkdownDocument{}, reader.Read(""))
 }
