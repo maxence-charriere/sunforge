@@ -10,6 +10,9 @@ var (
 	TextSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M21,6V8H3V6H21M3,18H12V16H3V18M3,13H21V11H3V13Z" />
 	</svg>`
+	InformationSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+	</svg>`
 	QuestionMarkSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,9.88 15.64,10.67 15.07,11.25M13,19H11V17H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
 	</svg>`
@@ -30,6 +33,9 @@ var (
 	</svg>`
 	ShieldSwordSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M12 1L3 5V11C3 16.5 6.8 21.7 12 23C17.2 21.7 21 16.5 21 11V5L12 1M15 15H13V18H11V15H9V13H11L10 7.1L12 5.5L14 7.1L13 13H15V15Z" />
+	</svg>`
+	ShieldCheckSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z" />
 	</svg>`
 	EmailSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
@@ -361,6 +367,18 @@ var (
 	EarthSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
 	</svg>`
+	OpenInNewSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+	</svg>`
+	AlertSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z" />
+	</svg>`
+	ScaleBalanceSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M12,3C10.73,3 9.6,3.8 9.18,5H3V7H4.95L2,14C1.53,16 3,17 5.5,17C8,17 9.56,16 9,14L6.05,7H9.17C9.5,7.85 10.15,8.5 11,8.83V20H2V22H22V20H13V8.82C13.85,8.5 14.5,7.85 14.82,7H17.95L15,14C14.53,16 16,17 18.5,17C21,17 22.56,16 22,14L19.05,7H21V5H14.83C14.4,3.8 13.27,3 12,3M12,5A1,1 0 0,1 13,6A1,1 0 0,1 12,7A1,1 0 0,1 11,6A1,1 0 0,1 12,5M5.5,10.25L7,14H4L5.5,10.25M18.5,10.25L20,14H17L18.5,10.25Z" />
+	</svg>`
+	GavelSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M2.3,20.28L11.9,10.68L10.5,9.26L9.78,9.97C9.39,10.36 8.76,10.36 8.37,9.97L7.66,9.26C7.27,8.87 7.27,8.24 7.66,7.85L13.32,2.19C13.71,1.8 14.34,1.8 14.73,2.19L15.44,2.9C15.83,3.29 15.83,3.92 15.44,4.31L14.73,5L16.15,6.43C16.54,6.04 17.17,6.04 17.56,6.43C17.95,6.82 17.95,7.46 17.56,7.85L18.97,9.26L19.68,8.55C20.07,8.16 20.71,8.16 21.1,8.55L21.8,9.26C22.19,9.65 22.19,10.29 21.8,10.68L16.15,16.33C15.76,16.72 15.12,16.72 14.73,16.33L14.03,15.63C13.63,15.24 13.63,14.6 14.03,14.21L14.73,13.5L13.32,12.09L3.71,21.7C3.32,22.09 2.69,22.09 2.3,21.7C1.91,21.31 1.91,20.67 2.3,20.28M20,19A2,2 0 0,1 22,21V22H12V21A2,2 0 0,1 14,19H20Z" />
+	</svg>`
 )
 
 const (
@@ -455,7 +473,7 @@ var (
 	initIconOnce sync.Once
 	icons        = []Icon{
 		{"help", QuestionMarkSVG},
-		{"about", QuestionMarkSVG},
+		{"about", InformationSVG},
 		{"privacy", LockSVG},
 		{"private", LockSVG},
 		{"public", LockOpenSVG},
@@ -472,6 +490,7 @@ var (
 		{"edit", PencilSVG},
 		{"edit on", PencilSVG},
 		{"format", FileDocumentEditSVG},
+		{"changes", FileDocumentEditSVG},
 		{"article format", FileDocumentEditSVG},
 		{"build", HammerSVG},
 		{"dev", HammerSVG},
@@ -500,6 +519,7 @@ var (
 		{"update", UpdateSVG},
 		{"sync", ReloadSVG},
 		{"calendar", CalendarSVG},
+		{"event", CalendarSVG},
 		{"season", CalendarSVG},
 		{"shield", ShieldSVG},
 		{"protection", ShieldSVG},
@@ -608,6 +628,15 @@ var (
 		{"share", ShareSVG},
 		{"cookie", CookieSVG},
 		{"public", EarthSVG},
+		{"third-party", OpenInNewSVG},
+		{"third party", OpenInNewSVG},
+		{"intellectual property", CopyrightSVG},
+		{"acceptable use", ShieldCheckSVG},
+		{"alert", AlertSVG},
+		{"disclaimer", AlertSVG},
+		{"limitation of liability", ScaleBalanceSVG},
+		{"gavel", GavelSVG},
+		{"law", GavelSVG},
 
 		{"discord", DiscordSVG},
 		{"twitter", TwitterSVG},
