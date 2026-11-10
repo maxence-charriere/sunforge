@@ -1296,7 +1296,7 @@ button {
 */
 :root {
   --box_padding_w: 30px;
-  --box_padding_h: 18px;
+  --box_padding_h: 24px;
   --box_padding: var(--box_padding_h) var(--box_padding_w);
   --box_background: #0f1011;
   --box_background_hover: #141516;
@@ -1304,7 +1304,7 @@ button {
   --box_border: 1px solid var(--box_border_color);
   --box_border_radius: 30px;
   --box_content_border_radius: 30px;
-  --box_gap: 12px;
+  --box_gap: 18px;
   --box_columns_gap: 6px 18px;
   --box_list_gap: 6px;
   --box_transition: transform 0.2s;
@@ -1427,10 +1427,6 @@ ul.vi-box {
 
 figure.vi-box {
   margin: 0;
-}
-
-.vi-box.vi-box-with-markdown h2 {
-  margin: 0 0 18px !important;
 }
 
 .vi-box.vi-box-with-markdown h3 {
@@ -1604,6 +1600,14 @@ figure.vi-box {
 .vi-box>.vi-banner+.p {
   margin: 0;
 }
+
+
+/*
+**
+** Markdown
+**
+*/
+
 
 /*
 **

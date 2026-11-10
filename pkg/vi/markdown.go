@@ -124,6 +124,9 @@ type MarkdownDocument struct {
 
 // MarkdownDocumentSection separates a section heading from its Markdown body.
 type MarkdownDocumentSection struct {
+	// ID is Goldmark's document-wide heading ID, matching ParseMarkdown output.
+	ID string
+
 	// Title is the H2 text without heading markers. Inline Markdown is preserved.
 	Title string
 
@@ -145,7 +148,7 @@ type MarkdownReader struct {
 func (r *MarkdownReader) Read(md string) MarkdownDocument {
 	r.document = MarkdownDocument{}
 	source := []byte(md)
-	doc := parser.New().Parse(source)
+	doc := parser.New(parser.WithAutoHeadingID()).Parse(source)
 	introStart := -1
 	introEnd := len(md)
 	sectionStart := -1
@@ -275,7 +278,9 @@ func markdownHeadingTitle(heading *ast.Heading, source []byte) string {
 }
 
 func (r *MarkdownReader) readSection(heading *ast.Heading, source []byte, content string) {
+	id, _ := heading.Attribute("id")
 	r.document.Sections = append(r.document.Sections, MarkdownDocumentSection{
+		ID:      id.Value(source),
 		Title:   markdownHeadingTitle(heading, source),
 		Content: strings.Trim(content, "\r\n"),
 	})
