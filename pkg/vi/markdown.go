@@ -77,11 +77,12 @@ func (m *markdown) Render() app.UI {
 	))
 }
 
+// ParseMarkdown renders Markdown as HTML with automatically generated heading IDs.
 func ParseMarkdown(md string) (string, error) {
 	var b bytes.Buffer
 	var source = []byte(md)
 
-	p := parser.New()
+	p := parser.New(parser.WithAutoHeadingID())
 	r := html.New()
 	doc := p.Parse(source)
 	if err := r.Render(&b, source, doc); err != nil {

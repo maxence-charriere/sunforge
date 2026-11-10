@@ -347,7 +347,12 @@ func TestParseMarkdown(t *testing.T) {
 		{
 			scenario: "headings",
 			in:       "# Title\n\n## Subtitle\n\nSection\n-------",
-			expected: "<h1>Title</h1>\n<h2>Subtitle</h2>\n<h2>Section</h2>\n",
+			expected: "<h1 id=\"title\">Title</h1>\n<h2 id=\"subtitle\">Subtitle</h2>\n<h2 id=\"section\">Section</h2>\n",
+		},
+		{
+			scenario: "duplicate heading IDs",
+			in:       "# Hello World!\n\n## Hello World!\n\nHello World!\n------------",
+			expected: "<h1 id=\"hello-world\">Hello World!</h1>\n<h2 id=\"hello-world-1\">Hello World!</h2>\n<h2 id=\"hello-world-2\">Hello World!</h2>\n",
 		},
 		{
 			scenario: "inline formatting",
