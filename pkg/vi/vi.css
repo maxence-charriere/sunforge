@@ -14,13 +14,15 @@
   --body_letter_spacing: 0.1px;
   --body_font_size: 14px;
   --body_comment_size: 12px;
+  --body_text_align: left;
+  --code_font_family: monospace;
   --subtitle_font_size: 16px;
   --input_font_size: 16px;
   --h1: 50px;
   --h2: 28px;
   --h3: 15px;
   --h4: 14px;
-  --code_font_family: monospace;
+
 
   /*
   ** Colors
@@ -164,7 +166,7 @@ h4,
 p,
 .p {
   margin: 12px 0 0;
-  text-align: justify;
+  text-align: var(--body_text_align);
 }
 
 a,
@@ -1550,7 +1552,7 @@ figure.vi-box {
   flex-direction: column;
   gap: 6px;
   padding-left: 18px;
-  text-align: justify;
+  text-align: var(--body_text_align);
 }
 
 .vi-markdown ul code,
