@@ -21,7 +21,7 @@ func TestMarkdownReader(t *testing.T) {
 			in:       "## Subtitle\n\n# First title\n\n# Second title",
 			expected: MarkdownDocument{
 				Title:    "Second title",
-				Sections: []string{"## Subtitle\n\n# First title\n\n# Second title"},
+				Sections: []MarkdownDocumentSection{{Title: "Subtitle", Content: "# First title\n\n# Second title"}},
 			},
 		},
 		{
@@ -65,7 +65,7 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "no H1",
 			in:       "#hashtag\n\n## Subtitle\n\nSection\n-------",
-			expected: MarkdownDocument{Sections: []string{"## Subtitle", "Section\n-------"}},
+			expected: MarkdownDocument{Sections: []MarkdownDocumentSection{{Title: "Subtitle"}, {Title: "Section"}}},
 		},
 		{
 			scenario: "empty H1 clears title",
@@ -77,7 +77,7 @@ func TestMarkdownReader(t *testing.T) {
 			in:       "# Earlier title\n\n#\n# \n#\t\n#hashtag\n## Subtitle\n##\tSubtitle",
 			expected: MarkdownDocument{
 				Intro:    "\n#\n# \n#\t\n#hashtag\n",
-				Sections: []string{"## Subtitle", "##\tSubtitle"},
+				Sections: []MarkdownDocumentSection{{Title: "Subtitle"}, {Title: "Subtitle"}},
 			},
 		},
 		{
@@ -132,11 +132,27 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{
 				Title: "Title",
 				Intro: "\nIntro  \nnext line.\n\n",
-				Sections: []string{
-					"## One\n\n- item\n  - nested\n### Details\nbody",
-					"## Two\nLast body",
+				Sections: []MarkdownDocumentSection{
+					{Title: "One", Content: "- item\n  - nested\n### Details\nbody"},
+					{Title: "Two", Content: "Last body"},
 				},
 			},
+		},
+		{
+			scenario: "section title preserves inline Markdown without heading markers",
+			in:       "## **你好** and [links](https://example.com) ###\n\nSection body.",
+			expected: MarkdownDocument{Sections: []MarkdownDocumentSection{{
+				Title:   "**你好** and [links](https://example.com)",
+				Content: "Section body.",
+			}}},
+		},
+		{
+			scenario: "section body preserves leading code indentation and trailing spaces",
+			in:       "## Code\n\n    indented code\n\nLine  \nnext  \n\n## End",
+			expected: MarkdownDocument{Sections: []MarkdownDocumentSection{
+				{Title: "Code", Content: "    indented code\n\nLine  \nnext  "},
+				{Title: "End"},
+			}},
 		},
 		{
 			scenario: "indented and tab separated sections",
@@ -144,7 +160,7 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{
 				Title:    "Title",
 				Intro:    "Intro\n",
-				Sections: []string{"## One\nBody one", "##\tTwo\nBody two", "## Three"},
+				Sections: []MarkdownDocumentSection{{Title: "One", Content: "Body one"}, {Title: "Two", Content: "Body two"}, {Title: "Three"}},
 			},
 		},
 		{
@@ -153,13 +169,13 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{
 				Title:    "Title",
 				Intro:    "\r\nIntro\r\n\r\n",
-				Sections: []string{"First\r\nsection\r\n---\r\nBody", "Second\r\n---"},
+				Sections: []MarkdownDocumentSection{{Title: "First\r\nsection", Content: "Body"}, {Title: "Second"}},
 			},
 		},
 		{
 			scenario: "empty headings and consecutive sections",
 			in:       "#\n##\n## Next\n##",
-			expected: MarkdownDocument{Sections: []string{"##", "## Next", "##"}},
+			expected: MarkdownDocument{Sections: []MarkdownDocumentSection{{}, {Title: "Next"}, {}}},
 		},
 		{
 			scenario: "intro without H2 or final newline",
@@ -170,7 +186,7 @@ func TestMarkdownReader(t *testing.T) {
 			scenario: "later H1 does not discard intro",
 			in:       "# First\nIntro\n## Section\n# Later\nBody",
 			expected: MarkdownDocument{
-				Title: "Later", Intro: "Intro\n", Sections: []string{"## Section\n# Later\nBody"},
+				Title: "Later", Intro: "Intro\n", Sections: []MarkdownDocumentSection{{Title: "Section", Content: "# Later\nBody"}},
 			},
 		},
 		{
@@ -179,7 +195,7 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{
 				Title:    "Title",
 				Intro:    "````md\n# Fake\n## Fake\n<!-- vi:author Ignored -->\n```\n## Still code\n````\n",
-				Sections: []string{"## Real\nBody"},
+				Sections: []MarkdownDocumentSection{{Title: "Real", Content: "Body"}},
 			},
 		},
 		{
@@ -187,7 +203,7 @@ func TestMarkdownReader(t *testing.T) {
 			in:       "# Title\n## One\n  ~~~md\n## Fake\n<!-- vi:title Ignored -->\n ~~~\n## Two",
 			expected: MarkdownDocument{
 				Title:    "Title",
-				Sections: []string{"## One\n  ~~~md\n## Fake\n<!-- vi:title Ignored -->\n ~~~", "## Two"},
+				Sections: []MarkdownDocumentSection{{Title: "One", Content: "  ~~~md\n## Fake\n<!-- vi:title Ignored -->\n ~~~"}, {Title: "Two"}},
 			},
 		},
 		{
@@ -201,14 +217,14 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{
 				Title:    "Title",
 				Intro:    "\n    ```\n      # Fake\n    ## Fake\n    <!-- vi:author Ignored -->\n\n",
-				Sections: []string{"## Real"},
+				Sections: []MarkdownDocumentSection{{Title: "Real"}},
 			},
 		},
 		{
 			scenario: "headings inside multiline comment",
 			in:       "# Title\n<!--\n# Fake\n## Fake\n-->\n## Real",
 			expected: MarkdownDocument{
-				Title: "Title", Intro: "<!--\n# Fake\n## Fake\n-->\n", Sections: []string{"## Real"},
+				Title: "Title", Intro: "<!--\n# Fake\n## Fake\n-->\n", Sections: []MarkdownDocumentSection{{Title: "Real"}},
 			},
 		},
 		{
@@ -217,7 +233,7 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{
 				Title:    "Title",
 				Intro:    "<div>\n# Fake\n## Fake\n<!-- vi:author Ignored -->\n</div>\n\n",
-				Sections: []string{"## Real"},
+				Sections: []MarkdownDocumentSection{{Title: "Real"}},
 			},
 		},
 		{
@@ -226,7 +242,7 @@ func TestMarkdownReader(t *testing.T) {
 			expected: MarkdownDocument{
 				Title:    "Title",
 				Intro:    "> # Quoted\n> ## Quoted section\n> <!-- vi:author Ignored -->\n\n- ## Listed section\n\n",
-				Sections: []string{"## Real"},
+				Sections: []MarkdownDocumentSection{{Title: "Real"}},
 			},
 		},
 		{
@@ -296,10 +312,10 @@ func TestMarkdownReaderReuse(t *testing.T) {
 		Title:    "First",
 		Author:   "Jane Doe",
 		Intro:    "<!-- vi:author Jane Doe -->\n",
-		Sections: []string{"## One\nBody"},
+		Sections: []MarkdownDocumentSection{{Title: "One", Content: "Body"}},
 	}, first)
 	require.Equal(t, MarkdownDocument{Title: "Second"}, second)
-	require.Equal(t, MarkdownDocument{Sections: []string{"## Other"}}, third)
+	require.Equal(t, MarkdownDocument{Sections: []MarkdownDocumentSection{{Title: "Other"}}}, third)
 	require.Equal(t, MarkdownDocument{}, reader.Read(""))
 }
 
@@ -320,7 +336,7 @@ func TestMarkdownReaderLineEndings(t *testing.T) {
 			require.Equal(t, MarkdownDocument{
 				Title:    "Title",
 				Intro:    "Intro" + test.ending,
-				Sections: []string{"## Section" + test.ending + "Body"},
+				Sections: []MarkdownDocumentSection{{Title: "Section", Content: "Body"}},
 			}, doc)
 		})
 	}

@@ -118,9 +118,18 @@ type MarkdownDocument struct {
 	// the first H2, or EOF. It is empty when no H1 precedes the first H2.
 	Intro string
 
-	// Sections contains each top-level H2 and the Markdown up to the next H2
-	// or EOF. Leading and trailing whitespace is trimmed from each section.
-	Sections []string
+	// Sections contains each top-level H2 title and its Markdown body.
+	Sections []MarkdownDocumentSection
+}
+
+// MarkdownDocumentSection separates a section heading from its Markdown body.
+type MarkdownDocumentSection struct {
+	// Title is the H2 text without heading markers. Inline Markdown is preserved.
+	Title string
+
+	// Content is the Markdown after the H2 and before the next top-level H2 or EOF.
+	// Boundary newlines are trimmed; indentation and other whitespace are preserved.
+	Content string
 }
 
 // MarkdownReader uses Goldmark to collect top-level headings, metadata comments,
@@ -140,6 +149,7 @@ func (r *MarkdownReader) Read(md string) MarkdownDocument {
 	introStart := -1
 	introEnd := len(md)
 	sectionStart := -1
+	var sectionHeading *ast.Heading
 
 	// Only document-level blocks define metadata and section boundaries.
 	// Goldmark keeps code, HTML, lists, and blockquotes in their own nodes.
@@ -162,9 +172,10 @@ func (r *MarkdownReader) Read(md string) MarkdownDocument {
 				if sectionStart < 0 {
 					introEnd = start
 				} else {
-					r.readSection(md[sectionStart:start])
+					r.readSection(sectionHeading, source, md[sectionStart:start])
 				}
-				sectionStart = start
+				sectionHeading = node
+				sectionStart = markdownHeadingEnd(md, node)
 			}
 		}
 	}
@@ -173,7 +184,7 @@ func (r *MarkdownReader) Read(md string) MarkdownDocument {
 		r.document.Intro = md[introStart:introEnd]
 	}
 	if sectionStart >= 0 {
-		r.readSection(md[sectionStart:])
+		r.readSection(sectionHeading, source, md[sectionStart:])
 	}
 	return r.document
 }
@@ -252,13 +263,20 @@ func (r *MarkdownReader) readComment(node *ast.HTMLBlock, source []byte) {
 }
 
 func (r *MarkdownReader) readH1(heading *ast.Heading, source []byte) {
+	r.document.Title = markdownHeadingTitle(heading, source)
+}
+
+func markdownHeadingTitle(heading *ast.Heading, source []byte) string {
 	var title strings.Builder
 	for _, segment := range heading.Source() {
 		title.Write(segment.Bytes(source))
 	}
-	r.document.Title = strings.TrimSpace(title.String())
+	return strings.TrimSpace(title.String())
 }
 
-func (r *MarkdownReader) readSection(v string) {
-	r.document.Sections = append(r.document.Sections, strings.TrimSpace(v))
+func (r *MarkdownReader) readSection(heading *ast.Heading, source []byte, content string) {
+	r.document.Sections = append(r.document.Sections, MarkdownDocumentSection{
+		Title:   markdownHeadingTitle(heading, source),
+		Content: strings.Trim(content, "\r\n"),
+	})
 }
