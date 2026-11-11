@@ -30,6 +30,7 @@ type Crucible interface {
 	Ads(...app.UI) Crucible
 	Notifications(...app.UI) Crucible
 	NotificationsBadge(bool) Crucible
+	WithFollowMeMenuSection() Crucible
 }
 
 // NewCrucible creates a responsive application layout for the named application.
@@ -45,19 +46,20 @@ func NewCrucible(appName string) Crucible {
 type crucible struct {
 	app.Compo
 
-	IID                 string
-	IClass              string
-	IIcon               string
-	IAppName            string
-	IVersion            string
-	IMenu               []app.UI
-	IIndex              []app.UI
-	INav                []app.UI
-	IContent            []app.UI
-	IFooter             []app.UI
-	IAds                []app.UI
-	INotifications      []app.UI
-	INotificationsBadge bool
+	IID                      string
+	IClass                   string
+	IIcon                    string
+	IAppName                 string
+	IVersion                 string
+	IMenu                    []app.UI
+	IIndex                   []app.UI
+	INav                     []app.UI
+	IContent                 []app.UI
+	IFooter                  []app.UI
+	IAds                     []app.UI
+	INotifications           []app.UI
+	INotificationsBadge      bool
+	IWithFollowMeMenuSection bool
 
 	panePopped           bool
 	notificationsVisible bool
@@ -136,6 +138,11 @@ func (c *crucible) NotificationsBadge(v bool) Crucible {
 	return c
 }
 
+func (c *crucible) WithFollowMeMenuSection() Crucible {
+	c.IWithFollowMeMenuSection = true
+	return c
+}
+
 func (c *crucible) OnMount(ctx app.Context) {
 	ctx.Handle(showPop, c.handleShowPop)
 	ctx.Handle(hidePop, c.handleHidePop)
@@ -199,6 +206,7 @@ func (c *crucible) Render() app.UI {
 						),
 					app.Div().
 						Class("vi-crucible-menu").
+						Class(StyleFromBool("vi-crucible-menu-follow-me-section", c.IWithFollowMeMenuSection)).
 						Body(c.IMenu...),
 					app.Div().
 						Class("vi-crucible-index").

@@ -363,6 +363,7 @@ button {
 
   --crucible_menu_section_padding: 36px 0 6px;
   --crucible_menu_item_padding: 3px 0;
+  --crucible_menu_follow_me_gap: 6px;
 
   --crucible_nav_height: 60px;
   --crucible_nav_border_radius: 30px;
@@ -565,6 +566,12 @@ button {
   grid-column: 1 / span 1;
   grid-row: 2 / span 1;
   padding: 0 var(--crucible_content_padding_w);
+}
+
+.vi-crucible-pane .vi-crucible-menu-follow-me-section>ul:last-of-type {
+  display: flex;
+  align-items: center;
+  gap: var(--crucible_menu_follow_me_gap);
 }
 
 .vi-crucible-index {
