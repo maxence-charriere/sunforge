@@ -190,6 +190,9 @@ var (
 	AccountWrenchSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M22.9 21.2L18.8 17.1C19.2 16.1 19 14.8 18.1 14C17.2 13.1 15.9 12.9 14.8 13.4L16.7 15.3L15.3 16.7L13.3 14.7C12.8 15.8 13 17.1 13.9 18.1C14.8 19 16 19.2 17 18.8L21.1 22.9C21.3 23.1 21.6 23.1 21.7 22.9L22.7 21.9C23 21.6 23 21.3 22.9 21.2M13 20H2V18C2 15.8 5.6 14 10 14C10.5 14 11 14 11.4 14.1C11.1 14.7 11 15.3 11 16C11 17.6 11.8 19.1 13 20M10 4C7.8 4 6 5.8 6 8S7.8 12 10 12 14 10.2 14 8 12.2 4 10 4" />
 	</svg>`
+	AccountSearchSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M10,4A4,4 0 0,1 14,8C14,8.91 13.69,9.75 13.18,10.43C12.32,10.75 11.55,11.26 10.91,11.9L10,12A4,4 0 0,1 6,8A4,4 0 0,1 10,4M2,20V18C2,15.88 5.31,14.14 9.5,14C9.18,14.78 9,15.62 9,16.5C9,17.79 9.38,19 10,20H2Z" />
+	</svg>`
 	DeleteSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
 	</svg>`
@@ -394,6 +397,9 @@ var (
 	GavelSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M2.3,20.28L11.9,10.68L10.5,9.26L9.78,9.97C9.39,10.36 8.76,10.36 8.37,9.97L7.66,9.26C7.27,8.87 7.27,8.24 7.66,7.85L13.32,2.19C13.71,1.8 14.34,1.8 14.73,2.19L15.44,2.9C15.83,3.29 15.83,3.92 15.44,4.31L14.73,5L16.15,6.43C16.54,6.04 17.17,6.04 17.56,6.43C17.95,6.82 17.95,7.46 17.56,7.85L18.97,9.26L19.68,8.55C20.07,8.16 20.71,8.16 21.1,8.55L21.8,9.26C22.19,9.65 22.19,10.29 21.8,10.68L16.15,16.33C15.76,16.72 15.12,16.72 14.73,16.33L14.03,15.63C13.63,15.24 13.63,14.6 14.03,14.21L14.73,13.5L13.32,12.09L3.71,21.7C3.32,22.09 2.69,22.09 2.3,21.7C1.91,21.31 1.91,20.67 2.3,20.28M20,19A2,2 0 0,1 22,21V22H12V21A2,2 0 0,1 14,19H20Z" />
 	</svg>`
+	PlaylistCheckSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M14 10H3V12H14V10M14 6H3V8H14V6M3 16H10V14H3V16M21.5 11.5L23 13L16 20L11.5 15.5L13 14L16 17L21.5 11.5Z" />
+	</svg>`
 )
 
 const (
@@ -531,6 +537,7 @@ var (
 		{"post", SendSVG},
 		{"wiki", WikiSVG},
 		{"update", UpdateSVG},
+		{"availability and changes", UpdateSVG},
 		{"sync", ReloadSVG},
 		{"calendar", CalendarSVG},
 		{"event", CalendarSVG},
@@ -607,6 +614,7 @@ var (
 		{"information collected", DatabaseSVG},
 		{"account deletion", DatabaseRemoveSVG},
 		{"analytics", AnalyticsSVG},
+		{"advertising", AdsSVG},
 		{"adsense", AdsSVG},
 		{"venatus media", AdsSVG},
 		{"child", ChildrenSVG},
@@ -649,6 +657,7 @@ var (
 		{"social media", ShareSVG},
 		{"cookie", CookieSVG},
 		{"public", EarthSVG},
+		{"public character profiles", AccountSearchSVG},
 		{"third-party", OpenInNewSVG},
 		{"external links", OpenInNewSVG},
 		{"intellectual property", CopyrightSVG},
@@ -661,7 +670,9 @@ var (
 		{"terms of service", GavelSVG},
 		{"law", GavelSVG},
 		{"changes to this policy", FileClockSVG},
+		{"changes to these terms", FileClockSVG},
 		{"privacy rights", FileCheckSVG},
+		{"use of the website", PlaylistCheckSVG},
 
 		{"discord", DiscordSVG},
 		{"twitter", TwitterSVG},
