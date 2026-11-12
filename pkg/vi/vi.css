@@ -2838,5 +2838,6 @@ div[data-vi="svg"] {
 
 .vi-vm>.vi-vm-placeholder {
   z-index: -1;
-  background: var(--box_background);
+  box-sizing: border-box;
+  border: 1px solid var(--line_color);
 }
