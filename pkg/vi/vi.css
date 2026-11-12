@@ -350,6 +350,7 @@ button {
   --crucible_ads_display: none;
   --crucible_ads_video_height: 210px;
   --crubible_ads_content_row: 1 / span 1;
+
   --crucible_overlay_zindex: 100000;
   --crucible_overlay_display: none;
   --crucible_overlay_background: linear-gradient(var(--background-color),
@@ -371,6 +372,8 @@ button {
   --crucible_nav_gap: 30px;
   --crucible_nav_background: var(--background-color);
   --crucible_nav_pane_button_display: block;
+
+  --crucible_content_section_padding: 90px 0 0;
 
   --crucible_footer_gap: 6px 30px;
 
@@ -503,7 +506,7 @@ button {
 }
 
 /* Crucible Ads Position */
-@media (min-height: 960px) {
+@media (min-height: 1050px) {
   :root {
     --crubible_ads_content_row: 1 / span 2;
   }
@@ -630,6 +633,14 @@ button {
 .vi-crucible-content>main {
   box-sizing: border-box;
   min-height: 100%;
+}
+
+.vi-crucible-content>main>section {
+  padding: var(--crucible_content_section_padding);
+}
+
+.vi-crucible-content>main>section:first-of-type {
+  padding: 0;
 }
 
 .vi-crucible-content>footer {
@@ -2041,7 +2052,7 @@ div[data-vi="svg"] {
   height: var(--banner_height);
   min-height: var(--banner_min_height);
   width: calc(100% + 2 * var(--banner_padding_w));
-  margin: 0 0 calc(2 * var(--banner_padding_h)) calc(-1 * var(--banner_padding_w));
+  margin: 0 0 var(--banner_padding_h) calc(-1 * var(--banner_padding_w));
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
 }
@@ -2089,7 +2100,7 @@ div[data-vi="svg"] {
 
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: 1fr auto auto;
   box-sizing: border-box;
   max-width: var(--banner_content_max_width);
   padding: var(--banner_padding_h) var(--banner_padding_w);
