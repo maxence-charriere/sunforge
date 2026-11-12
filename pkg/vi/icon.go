@@ -581,6 +581,7 @@ var (
 		{"decline", CloseSVG},
 		{"tune", TuneSVG},
 		{"tuning", TuneSVG},
+		{"manage personal data", TuneSVG},
 		{"hotfix", WrenchCheckSVG},
 		{"fixe", WrenchCheckSVG},
 		{"assist", AssistantSVG},
@@ -643,6 +644,7 @@ var (
 		{"disclaimer", AlertSVG},
 		{"limitation of liability", ScaleBalanceSVG},
 		{"gavel", GavelSVG},
+		{"terms of service", GavelSVG},
 		{"law", GavelSVG},
 
 		{"discord", DiscordSVG},

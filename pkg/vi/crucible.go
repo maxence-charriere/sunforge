@@ -223,9 +223,6 @@ func (c *crucible) Render() app.UI {
 						Class("vi-unselectable").
 						Body(
 							app.Ul().Body(
-								app.Range(c.IFooter).Slice(func(i int) app.UI {
-									return app.Li().Body(c.IFooter[i])
-								}),
 								NewMediaObject().
 									InLi().
 									AsA().
@@ -238,6 +235,9 @@ func (c *crucible) Render() app.UI {
 									Class(StyleFromURLPath("accent", "/privacy")).
 									Href("/privacy").
 									Text("Privacy Policy"),
+								app.Range(c.IFooter).Slice(func(i int) app.UI {
+									return app.Li().Body(c.IFooter[i])
+								}),
 								NewMediaObject().
 									InLi().
 									SVGIcon(CopyrightSVG).
@@ -257,8 +257,16 @@ func (c *crucible) Render() app.UI {
 						NewMediaObject().
 							InLi().
 							AsButton().
-							SVGIcon(MenuSVG).
+							WithMediaBorder().
+							WithMediaRounded().
+							Image(c.IIcon).
 							OnClick(c.popPane),
+						NewMediaObject().
+							InLi().
+							AsButton().
+							Class(Disabled(!CanNavigateBack())).
+							SVGIcon(ArrowLeftSVG).
+							OnClick(NavigateBack),
 						app.Range(c.INav).
 							Slice(func(i int) app.UI {
 								return app.Li().Body(c.INav[i])
