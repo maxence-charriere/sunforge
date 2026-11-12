@@ -70,5 +70,5 @@ func CanNavigateBack() bool {
 	if !navigation.Truthy() {
 		return false
 	}
-	return navigation.Get("canGoBack").Bool()
+	return navigation.Get("canGoBack").Truthy()
 }
