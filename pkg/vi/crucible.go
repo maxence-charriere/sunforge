@@ -259,14 +259,17 @@ func (c *crucible) Render() app.UI {
 							AsButton().
 							WithMediaBorder().
 							WithMediaRounded().
+							OnClick(c.popPane).
 							Image(c.IIcon).
-							OnClick(c.popPane),
+							Alt("").
+							Help("Open menu"),
 						NewMediaObject().
 							InLi().
 							AsButton().
 							Class(Disabled(!CanNavigateBack())).
+							OnClick(NavigateBack).
 							SVGIcon(ArrowLeftSVG).
-							OnClick(NavigateBack),
+							Help("Go back"),
 						app.Range(c.INav).
 							Slice(func(i int) app.UI {
 								return app.Li().Body(c.INav[i])
@@ -275,14 +278,16 @@ func (c *crucible) Render() app.UI {
 							InLi().
 							AsButton().
 							SVGIcon(ShareSVG).
-							OnClick(ShareCurrentURL),
+							OnClick(ShareCurrentURL).
+							Help("Share"),
 						app.If(c.installVisible, func() app.UI {
 							if !c.appleBrowser {
 								return NewMediaObject().
 									InLi().
 									AsButton().
+									OnClick(InstallPWA).
 									SVGIcon(InstallSVG).
-									OnClick(InstallPWA)
+									Helpf("Install %s", c.IAppName)
 							}
 							return NewPoppable().
 								WithoutHover().
@@ -290,7 +295,8 @@ func (c *crucible) Render() app.UI {
 									NewMediaObject().
 										InLi().
 										AsButton().
-										SVGIcon(InstallSVG),
+										SVGIcon(InstallSVG).
+										Helpf("Install %s", c.IAppName),
 								).
 								Pop(NewHowToInstallOnAppleDevices(c.IAppName))
 						}),
@@ -298,8 +304,9 @@ func (c *crucible) Render() app.UI {
 							InLi().
 							AsButton().
 							Class(StyleFromBool("vi-crucible-notifications-badge", c.INotificationsBadge)).
+							OnClick(c.showNotifications).
 							SVGIcon(BellSVG).
-							OnClick(c.showNotifications),
+							Help("Notifications"),
 					),
 				),
 
