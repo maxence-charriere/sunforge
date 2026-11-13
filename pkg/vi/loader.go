@@ -37,6 +37,7 @@ type Loader interface {
 
 func NewLoader() Loader {
 	return &loader{
+		IDescription:  "Loading...",
 		IErrorIconSVG: RobotDeadSVG,
 	}
 }
