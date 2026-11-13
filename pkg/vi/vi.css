@@ -1253,11 +1253,11 @@ button {
 */
 :root {
   --loader_icon_size: 90px;
-  --loader_gap: 3px 30px;
+  --loader_gap: 24px;
   --loader_title_size: var(--h2);
   --loader_padding: var(--crucible_content_padding_h) var(--crucible_content_padding_w);
   --loader_content_max_width: 600px;
-  --loader_description_color: var(--acccent);
+  --loader_description_color: var(--accent_color);
   --loader_description_user_select: initial;
   --loader_description_white_space: initial;
   --loader_reload_display: none;
