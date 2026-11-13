@@ -18,8 +18,8 @@ type Loader interface {
 	// Sets the class. Multiple classes can be defined by successive calls.
 	Class(v ...string) Loader
 
-	// Set whether the the loader is displayed.
-	Loading(v bool) Loader
+	// Set the title.
+	Title(v app.UI) Loader
 
 	// Set the description.
 	Description(v string) Loader
@@ -28,39 +28,29 @@ type Loader interface {
 	// Set the loading error.
 	Err(v error) Loader
 
-	// Sets the content.
-	Content(v app.UI) Loader
-
-	// Sets the icon. Default is a spinner.
-	Icon(v app.UI) Loader
-
-	// Sets the error icon. Default is a spinner.
-	ErrorIcon(v app.UI) Loader
-
-	// Set the title.
-	Title(v app.UI) Loader
+	// Sets the error svg icon.
+	ErrorIconSVG(v string) Loader
 
 	// Expands to all available space
 	Expand() Loader
 }
 
 func NewLoader() Loader {
-	return &loader{ILoading: true}
+	return &loader{
+		IErrorIconSVG: RobotDeadSVG,
+	}
 }
 
 type loader struct {
 	app.Compo
 
-	IID          string
-	IClass       string
-	IDescription string
-	ILoading     bool
-	IErr         error
-	IContent     app.UI
-	IIcon        app.UI
-	IErrorIcon   app.UI
-	ITitle       app.UI
-	IExpand      bool
+	IID           string
+	IClass        string
+	IDescription  string
+	IErrorIconSVG string
+	ITitle        app.UI
+	IErr          error
+	IExpand       bool
 
 	reloading bool
 }
@@ -75,11 +65,6 @@ func (l *loader) Class(v ...string) Loader {
 	return l
 }
 
-func (l *loader) Loading(v bool) Loader {
-	l.ILoading = v
-	return l
-}
-
 func (l *loader) Description(v string) Loader {
 	l.IDescription = v
 	return l
@@ -89,32 +74,15 @@ func (l *loader) Descriptionf(format string, v ...any) Loader {
 	return l.Description(fmt.Sprintf(format, v...))
 }
 
+func (l *loader) ErrorIconSVG(v string) Loader {
+	if v != "" {
+		l.IErrorIconSVG = v
+	}
+	return l
+}
+
 func (l *loader) Err(err error) Loader {
 	l.IErr = err
-	return l
-}
-
-func (l *loader) Content(v app.UI) Loader {
-	content := app.FilterUIElems(v)
-	if len(content) != 0 {
-		l.IContent = content[0]
-	}
-	return l
-}
-
-func (l *loader) Icon(v app.UI) Loader {
-	icon := app.FilterUIElems(v)
-	if len(icon) != 0 {
-		l.IIcon = icon[0]
-	}
-	return l
-}
-
-func (l *loader) ErrorIcon(v app.UI) Loader {
-	icon := app.FilterUIElems(v)
-	if len(icon) != 0 {
-		l.IErrorIcon = icon[0]
-	}
 	return l
 }
 
@@ -132,62 +100,46 @@ func (l *loader) Expand() Loader {
 }
 
 func (l *loader) Render() app.UI {
-	if l.ILoading || l.IErr != nil || l.reloading {
-		var expand string
-		if l.IExpand {
-			expand = "vi-loader-expand"
-		}
-
-		return app.Div().
-			DataSet("vi", "loader").
-			Class("vi-loader").
-			Class(expand).
-			Class(l.IClass).
-			Body(
-				app.If(l.IErr == nil || l.reloading, func() app.UI {
-					if l.IIcon != nil {
-						return l.IIcon
-					}
-					return NewSpinner()
-				}).Else(func() app.UI {
-					if l.IErrorIcon != nil {
-						return l.IErrorIcon
-					}
-					return NewSVG().Data(DefaultErrorSVG)
-				}),
-
-				app.Div().Body(
-					l.ITitle,
-					app.If(l.IErr == nil, func() app.UI {
-						return app.P().Text(l.IDescription)
-					}).ElseSlice(func() []app.UI {
-						return []app.UI{
-							app.P().
-								Class("vi-loader-content-error").
-								Text(errors.UIError(l.IErr)),
-							NewBox().
-								WithoutBackground().
-								WithColumns().
-								Class("vi-loader-error-controls").
-								Class(Disabled(l.reloading)).
-								Content(
-									NewMediaObject().
-										AsButton().
-										SVGIcon(ArrowLeftSVG).
-										Text("Back").
-										OnClick(NavigateBack),
-									NewMediaObject().
-										AsButton().
-										SVGIcon(ReloadSVG).
-										Text("Reload").
-										OnClick(l.reload),
-								),
-						}
-					}),
-				),
-			)
+	description := l.IDescription
+	if l.IErr != nil {
+		description = errors.UIError(l.IErr)
 	}
-	return l.IContent
+
+	return app.Div().
+		Class("vi-loader").
+		Class(StyleFromBool("vi-loader-expand", l.IExpand)).
+		Class(StyleFromBool("vi-loader-error", l.IErr != nil)).
+		Class("vi-unselectable").
+		Class(l.IClass).
+		OnWheel(l.scroll).
+		Body(
+			app.Div().
+				Class("vi-loader-content").
+				OnClick(l.reload).
+				Body(
+					app.If(l.IErr == nil || l.reloading, func() app.UI {
+						return NewSpinner()
+					}).Else(func() app.UI {
+						return NewSVG().Data(l.IErrorIconSVG)
+					}),
+					app.Div().Body(
+						l.ITitle,
+						app.P().Text(description),
+						NewMediaObject().
+							AsButton().
+							Class("vi-loader-reload").
+							SVGIcon(ReloadSVG).
+							Text("Reload").
+							OnClick(l.reload),
+					),
+				),
+		)
+}
+
+func (l *loader) scroll(ctx app.Context, e app.Event) {
+	if l.IExpand {
+		e.PreventDefault()
+	}
 }
 
 func (l *loader) reload(ctx app.Context, e app.Event) {

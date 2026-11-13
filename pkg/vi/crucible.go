@@ -31,6 +31,7 @@ type Crucible interface {
 	Notifications(...app.UI) Crucible
 	NotificationsBadge(bool) Crucible
 	WithFollowMeMenuSection() Crucible
+	Loading(string, string, bool, error) Crucible
 }
 
 // NewCrucible creates a responsive application layout for the named application.
@@ -60,6 +61,10 @@ type crucible struct {
 	INotifications           []app.UI
 	INotificationsBadge      bool
 	IWithFollowMeMenuSection bool
+	ILoading                 bool
+	ILoadingTitle            string
+	ILoadingDescription      string
+	ILoadingError            error
 
 	panePopped           bool
 	notificationsVisible bool
@@ -143,6 +148,14 @@ func (c *crucible) WithFollowMeMenuSection() Crucible {
 	return c
 }
 
+func (c *crucible) Loading(title string, description string, show bool, err error) Crucible {
+	c.ILoading = show
+	c.ILoadingTitle = title
+	c.ILoadingDescription = description
+	c.ILoadingError = err
+	return c
+}
+
 func (c *crucible) OnMount(ctx app.Context) {
 	ctx.Handle(showPop, c.handleShowPop)
 	ctx.Handle(hidePop, c.handleHidePop)
@@ -218,7 +231,17 @@ func (c *crucible) Render() app.UI {
 				Body(
 					app.Main().
 						ID(PageTopID).
-						Body(c.IContent...),
+						Body(
+							app.If(c.ILoading || c.ILoadingError != nil, func() app.UI {
+								return NewLoader().
+									Expand().
+									Title(app.H1().Text(c.ILoadingTitle)).
+									Description(c.ILoadingDescription).
+									Err(c.ILoadingError)
+							}).ElseSlice(func() []app.UI {
+								return c.IContent
+							}),
+						),
 					app.Footer().
 						Class("vi-unselectable").
 						Body(
