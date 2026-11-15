@@ -339,7 +339,7 @@ button {
   --crucible_pane_display: none;
   --crucible_pane_justify_self: stretch;
   --crucible_pane_zindex: auto;
-  --crucible_pane_padding: 15vh 0 var(--crucible_content_padding_h);
+  --crucible_pane_padding: 14vh 0 var(--crucible_content_padding_h);
 
   --crucible_content_width: 1fr;
   --crucible_content_columns: 1 / span 1;
@@ -368,10 +368,11 @@ button {
   --crucible_menu_follow_me_gap: 6px;
 
   --crucible_nav_height: 60px;
+  --crucible_nav_border: 0;
   --crucible_nav_border_radius: 30px;
   --crucible_nav_padding: 6px 30px;
   --crucible_nav_gap: 30px;
-  --crucible_nav_background: var(--background-color);
+  --crucible_nav_background: rgba(8, 9, 10, 0.9);
   --crucible_nav_pane_button_display: block;
 
   --crucible_content_section_padding: 90px 0 0;
@@ -612,6 +613,7 @@ button {
 
   position: relative;
   box-sizing: border-box;
+  border: var(--crucible_nav_border);
   border-radius: var(--crucible_nav_border_radius);
   padding: var(--crucible_nav_padding);
   background: var(--crucible_nav_background);
