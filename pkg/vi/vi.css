@@ -339,7 +339,7 @@ button {
   --crucible_pane_display: none;
   --crucible_pane_justify_self: stretch;
   --crucible_pane_zindex: auto;
-  --crucible_pane_padding: 14vh 0 var(--crucible_content_padding_h);
+  --crucible_pane_padding: 12vh 0 var(--crucible_content_padding_h);
 
   --crucible_content_width: 1fr;
   --crucible_content_columns: 1 / span 1;
@@ -352,7 +352,7 @@ button {
   --crucible_ads_video_height: 210px;
   --crubible_ads_content_row: 1 / span 1;
 
-  --crucible_overlay_zindex: 1000000;
+  --crucible_overlay_zindex: 10000000;
   --crucible_overlay_display: none;
   --crucible_overlay_background: linear-gradient(var(--background-color),
       rgba(0, 0, 0, 0.95));
@@ -642,7 +642,7 @@ button {
   padding: var(--crucible_content_section_padding);
 }
 
-.vi-crucible-content>main>section:first-of-type {
+.vi-crucible-content>main>section:nth-child(2) {
   padding: 0;
 }
 
@@ -2061,7 +2061,7 @@ div[data-vi="svg"] {
   --banner_padding_w: var(--crucible_content_padding_w);
   --banner_padding_h: var(--crucible_content_padding_h);
   --banner_content_max_width: 960px;
-  --banner_content_gap: 6px;
+  --banner_content_gap: 0;
   --banner_image_position: center;
   --banner_nav_gap: var(--crucible_footer_gap);
 }
@@ -2162,6 +2162,10 @@ div[data-vi="svg"] {
   margin: 0;
   padding: 0;
   gap: var(--banner_nav_gap);
+}
+
+.vi-banner-content p {
+  margin: 0;
 }
 
 
