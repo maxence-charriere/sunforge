@@ -19,7 +19,7 @@
   --subtitle_font_size: 16px;
   --input_font_size: 16px;
   --h1: 50px;
-  --h2: 28px;
+  --h2: 24px;
   --h3: 15px;
   --h4: 14px;
 
@@ -295,6 +295,7 @@ button {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .unselectable,
@@ -1368,11 +1369,11 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
+  box-sizing: border-box;
   padding: var(--box_padding);
   border: var(--box_border);
   border-radius: var(--box_border_radius);
   background: var(--box_background);
-  box-sizing: border-box;
   overflow: hidden;
 }
 

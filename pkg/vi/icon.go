@@ -403,6 +403,9 @@ var (
 	PlaylistCheckSVG = `<svg $id $class $help viewBox="0 0 24 24">
 		<path fill="currentColor" d="M14 10H3V12H14V10M14 6H3V8H14V6M3 16H10V14H3V16M21.5 11.5L23 13L16 20L11.5 15.5L13 14L16 17L21.5 11.5Z" />
 	</svg>`
+	ScriptSVG = `<svg $id $class $help viewBox="0 0 24 24">
+		<path fill="currentColor" d="M17.8,20C17.4,21.2 16.3,22 15,22H5C3.3,22 2,20.7 2,19V18H5L14.2,18C14.6,19.2 15.7,20 17,20H17.8M19,2H8C6.3,2 5,3.3 5,5V16H16V17C16,17.6 16.4,18 17,18H18V5C18,4.4 18.4,4 19,4C19.6,4 20,4.4 20,5V6H22V5C22,3.3 20.7,2 19,2Z" />
+	</svg>`
 )
 
 const (
@@ -676,6 +679,7 @@ var (
 		{"changes to these terms", FileClockSVG},
 		{"privacy rights", FileCheckSVG},
 		{"use of the website", PlaylistCheckSVG},
+		{"news", ScriptSVG},
 
 		{"discord", DiscordSVG},
 		{"twitter", TwitterSVG},
