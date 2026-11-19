@@ -13,6 +13,7 @@ type Tiles interface {
 	AsAside() Tiles
 	WithSmallItems() Tiles
 	WithLargeItems() Tiles
+	WithItemMinHeight() Tiles
 	ID(v string) Tiles
 	Class(v ...string) Tiles
 	Aria(k, v string) Tiles
@@ -27,13 +28,14 @@ func NewTiles() Tiles {
 type tiles struct {
 	app.Compo
 
-	IID         string
-	IClass      string
-	IRootType   string
-	ISmallItems bool
-	ILargeItems bool
-	IAria       map[string]string
-	IContent    []app.UI
+	IID                string
+	IClass             string
+	IRootType          string
+	ISmallItems        bool
+	ILargeItems        bool
+	IWithItemMinHeight bool
+	IAria              map[string]string
+	IContent           []app.UI
 }
 
 func (t *tiles) AsSection() Tiles {
@@ -53,6 +55,11 @@ func (t *tiles) WithSmallItems() Tiles {
 
 func (t *tiles) WithLargeItems() Tiles {
 	t.ILargeItems = true
+	return t
+}
+
+func (t *tiles) WithItemMinHeight() Tiles {
+	t.IWithItemMinHeight = true
 	return t
 }
 
@@ -89,6 +96,7 @@ func (t *tiles) Render() app.UI {
 		Class("vi-tiles").
 		Class(StyleFromBool("vi-tiles-small-items", t.ISmallItems)).
 		Class(StyleFromBool("vi-tiles-large-items", t.ILargeItems)).
+		Class(StyleFromBool("vi-tiles-item-min-height", t.IWithItemMinHeight)).
 		Class(t.IClass).
 		Body(
 			app.Range(t.IContent).Slice(func(i int) app.UI {
