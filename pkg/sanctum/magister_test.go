@@ -28,7 +28,7 @@ func TestNewScribe(t *testing.T) {
 			} `json:"input"`
 		}
 		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
-		require.Equal(t, "gpt-6.2-astra", body.Model)
+		require.Equal(t, "gpt-6.2-sol", body.Model)
 		require.Equal(t, "medium", body.Reasoning.Effort)
 		require.Equal(t, 32768, body.MaxOutputTokens)
 		require.Equal(t, prompt, body.Instructions)

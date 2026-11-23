@@ -19,14 +19,14 @@ type Magister interface {
 }
 
 // NewScribe returns a Magister for source analysis and writing, backed by
-// GPT-6.2 Astra with medium reasoning effort. Supply editorial instructions in
+// GPT-6.2 Sol with medium reasoning effort. Supply editorial instructions in
 // the prompt passed to Ask or Askf.
 // Output is capped at 32,768 tokens, including reasoning tokens.
 // The caller's context controls request deadlines.
 func NewScribe(client openai.Client) Magister {
 	return &openAIAgent{
 		Client:          client,
-		Model:           string(shared.ChatModelGPT6_2Astra),
+		Model:           string(shared.ChatModelGPT6_2Sol),
 		MaxToken:        32768,
 		ReasoningEffort: openai.ReasoningEffortMedium,
 	}

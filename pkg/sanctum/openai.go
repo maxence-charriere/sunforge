@@ -18,8 +18,6 @@ type openAIAgent struct {
 	ReasoningEffort openai.ReasoningEffort
 }
 
-var _ Magister = (*openAIAgent)(nil)
-
 func (a *openAIAgent) Ask(ctx context.Context, in any, out any, prompt string) error {
 	msg, err := json.Marshal(in)
 	if err != nil {
