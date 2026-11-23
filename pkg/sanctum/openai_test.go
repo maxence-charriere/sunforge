@@ -22,7 +22,12 @@ func (f openAITransport) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 func testOpenAIAgent(client openai.Client, model string, maxToken int) Magister {
-	return &openAIAgent{Client: client, Model: model, MaxToken: maxToken}
+	return &openAIAgent{
+		Client:          client,
+		Model:           model,
+		MaxToken:        maxToken,
+		ReasoningEffort: openai.ReasoningEffortNone,
+	}
 }
 
 func testOpenAIClient(transport openAITransport) openai.Client {
@@ -131,6 +136,22 @@ func TestOpenAIAgentAskInvalidInput(t *testing.T) {
 	require.ErrorAs(t, err, &encodingError)
 }
 
+func TestOpenAIAgentAskIncomplete(t *testing.T) {
+	for _, reason := range []string{"max_output_tokens", "content_filter"} {
+		t.Run(reason, func(t *testing.T) {
+			client := testOpenAIClient(func(r *http.Request) (*http.Response, error) {
+				// Even valid JSON must be rejected when the response is incomplete.
+				return openAIResponse(http.StatusOK, `{"status":"incomplete","incomplete_details":{"reason":"`+reason+`"},"output":[{"type":"message","content":[{"type":"output_text","text":"{\"title\":\"Partial article\"}"}]}]}`), nil
+			})
+			out := map[string]string{"title": "Original article"}
+			err := testOpenAIAgent(client, "test-model", 32768).Ask(context.Background(), nil, &out, "Write an article")
+			require.ErrorContains(t, err, "openai response is incomplete")
+			require.Equal(t, reason, errors.Tag(err, "reason"))
+			require.Equal(t, map[string]string{"title": "Original article"}, out)
+		})
+	}
+}
+
 func TestOpenAIAgentAskCanceled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -141,4 +162,19 @@ func TestOpenAIAgentAskCanceled(t *testing.T) {
 	var out any
 	err := testOpenAIAgent(client, "test-model", 512).Ask(ctx, nil, &out, "Answer")
 	require.ErrorIs(t, err, context.Canceled)
+}
+
+func TestOpenAIAgentAskDefaultReasoning(t *testing.T) {
+	called := false
+	client := testOpenAIClient(func(r *http.Request) (*http.Response, error) {
+		called = true
+		var body map[string]any
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+		require.NotContains(t, body, "reasoning")
+		return openAIResponse(http.StatusOK, `{"output":[{"type":"message","content":[{"type":"output_text","text":"{}"}]}]}`), nil
+	})
+	agent := &openAIAgent{Client: client, Model: "test-model"}
+	var out map[string]any
+	require.NoError(t, agent.Ask(context.Background(), nil, &out, "Answer"))
+	require.True(t, called)
 }

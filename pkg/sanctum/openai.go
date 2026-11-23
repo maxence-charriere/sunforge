@@ -12,9 +12,10 @@ import (
 )
 
 type openAIAgent struct {
-	Client   openai.Client
-	Model    string
-	MaxToken int
+	Client          openai.Client
+	Model           string
+	MaxToken        int
+	ReasoningEffort openai.ReasoningEffort
 }
 
 var _ Magister = (*openAIAgent)(nil)
@@ -28,9 +29,6 @@ func (a *openAIAgent) Ask(ctx context.Context, in any, out any, prompt string) e
 	params := responses.ResponseNewParams{
 		Model:        a.Model,
 		Instructions: openai.String(prompt),
-		Reasoning: openai.ReasoningParam{
-			Effort: openai.ReasoningEffortNone,
-		},
 		Input: responses.ResponseNewParamsInputUnion{
 			OfInputItemList: responses.ResponseInputParam{
 				responses.ResponseInputItemUnionParam{
@@ -49,6 +47,9 @@ func (a *openAIAgent) Ask(ctx context.Context, in any, out any, prompt string) e
 			},
 		},
 	}
+	if a.ReasoningEffort != "" {
+		params.Reasoning = openai.ReasoningParam{Effort: a.ReasoningEffort}
+	}
 	if a.MaxToken > 0 {
 		params.MaxOutputTokens = openai.Int(int64(a.MaxToken))
 	}
@@ -56,6 +57,10 @@ func (a *openAIAgent) Ask(ctx context.Context, in any, out any, prompt string) e
 	resp, err := a.Client.Responses.New(ctx, params)
 	if err != nil {
 		return errors.New("openai response failed").Wrap(err)
+	}
+	if resp.Status == responses.ResponseStatusIncomplete {
+		return errors.New("openai response is incomplete").
+			WithTag("reason", resp.IncompleteDetails.Reason)
 	}
 
 	text := strings.TrimSpace(resp.OutputText())
