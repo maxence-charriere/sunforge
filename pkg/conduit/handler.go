@@ -144,6 +144,10 @@ func (h BaseHandler) NotModified(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotModified)
 }
 
+func (h BaseHandler) NoContent(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // Encodes the given value to JSON.
 func (h BaseHandler) Encode(v any) ([]byte, error) {
 	if h.Encoder == nil {
