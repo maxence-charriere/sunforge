@@ -115,7 +115,8 @@ type MarkdownDocument struct {
 	ModifiedAt time.Time
 
 	// Intro is the original Markdown after the first top-level H1 and before
-	// the first H2, or EOF. It is empty when no H1 precedes the first H2.
+	// the first top-level H2, or EOF. If no H1 precedes the first H2, or EOF,
+	// it starts at the beginning of the document.
 	Intro string
 
 	// Sections contains each top-level H2 title and its Markdown body.
@@ -183,7 +184,10 @@ func (r *MarkdownReader) Read(md string) MarkdownDocument {
 		}
 	}
 
-	if introStart >= 0 && introStart < introEnd {
+	if introStart < 0 {
+		introStart = 0
+	}
+	if introStart < introEnd {
 		r.document.Intro = md[introStart:introEnd]
 	}
 	if sectionStart >= 0 {

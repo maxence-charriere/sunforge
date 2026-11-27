@@ -65,7 +65,36 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "no H1",
 			in:       "#hashtag\n\n## Subtitle\n\nSection\n-------",
-			expected: MarkdownDocument{Sections: []MarkdownDocumentSection{{ID: "subtitle", Title: "Subtitle"}, {ID: "section", Title: "Section"}}},
+			expected: MarkdownDocument{Intro: "#hashtag\n\n", Sections: []MarkdownDocumentSection{{ID: "subtitle", Title: "Subtitle"}, {ID: "section", Title: "Section"}}},
+		},
+		{
+			scenario: "intro without headings or final newline",
+			in:       "An **intro**.\n\nAnother paragraph.",
+			expected: MarkdownDocument{Intro: "An **intro**.\n\nAnother paragraph."},
+		},
+		{
+			scenario: "intro with metadata title and no H1",
+			in:       "<!-- vi:title Title -->\n\nIntro.\n\n## Section\nBody",
+			expected: MarkdownDocument{
+				Title: "Title", Intro: "<!-- vi:title Title -->\n\nIntro.\n\n",
+				Sections: []MarkdownDocumentSection{{ID: "section", Title: "Section", Content: "Body"}},
+			},
+		},
+		{
+			scenario: "H1 after first H2 preserves headingless intro",
+			in:       "Intro.\n\n## Section\n# Later\nBody",
+			expected: MarkdownDocument{
+				Title: "Later", Intro: "Intro.\n\n",
+				Sections: []MarkdownDocumentSection{{ID: "section", Title: "Section", Content: "# Later\nBody"}},
+			},
+		},
+		{
+			scenario: "intro without H1 before Setext H2 preserves CRLF",
+			in:       "Intro.\r\n\r\nSection\r\n-------\r\nBody",
+			expected: MarkdownDocument{
+				Intro:    "Intro.\r\n\r\n",
+				Sections: []MarkdownDocumentSection{{ID: "section", Title: "Section", Content: "Body"}},
+			},
 		},
 		{
 			scenario: "empty H1 clears title",
@@ -83,17 +112,17 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "description comment",
 			in:       "<!-- vi:description TBH -->",
-			expected: MarkdownDocument{Description: "TBH"},
+			expected: MarkdownDocument{Intro: "<!-- vi:description TBH -->", Description: "TBH"},
 		},
 		{
 			scenario: "author with whitespace and unicode",
 			in:       "<!-- vi:author\t  Renée Chen 陳 \t-->",
-			expected: MarkdownDocument{Author: "Renée Chen 陳"},
+			expected: MarkdownDocument{Intro: "<!-- vi:author\t  Renée Chen 陳 \t-->", Author: "Renée Chen 陳"},
 		},
 		{
 			scenario: "later author wins",
 			in:       "<!-- vi:author First Author -->\n<!-- vi:author Second Author -->",
-			expected: MarkdownDocument{Author: "Second Author"},
+			expected: MarkdownDocument{Intro: "<!-- vi:author First Author -->\n<!-- vi:author Second Author -->", Author: "Second Author"},
 		},
 		{
 			scenario: "all fields mixed with markdown",
@@ -120,11 +149,12 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "tabs padding and CRLF",
 			in:       "   <!--\tvi:title\t  A  title\twith spaces \t--> \r\n<!--vi:description TBH-->",
-			expected: MarkdownDocument{Title: "A  title\twith spaces", Description: "TBH"},
+			expected: MarkdownDocument{Intro: "   <!--\tvi:title\t  A  title\twith spaces \t--> \r\n<!--vi:description TBH-->", Title: "A  title\twith spaces", Description: "TBH"},
 		},
 		{
 			scenario: "tab indented metadata is code",
 			in:       " \t<!-- vi:title Ignored -->\r\n",
+			expected: MarkdownDocument{Intro: " \t<!-- vi:title Ignored -->\r\n"},
 		},
 		{
 			scenario: "intro and multiple sections preserve Markdown",
@@ -248,45 +278,51 @@ func TestMarkdownReader(t *testing.T) {
 		{
 			scenario: "preserve punctuation and unicode",
 			in:       "<!-- vi:description 你好: **world** & <b>hello</b> -->",
-			expected: MarkdownDocument{Description: "你好: **world** & <b>hello</b>"},
+			expected: MarkdownDocument{Intro: "<!-- vi:description 你好: **world** & <b>hello</b> -->", Description: "你好: **world** & <b>hello</b>"},
 		},
 		{
 			scenario: "later value wins",
 			in:       "<!-- vi:title First -->\n<!-- vi:title Second -->",
-			expected: MarkdownDocument{Title: "Second"},
+			expected: MarkdownDocument{Intro: "<!-- vi:title First -->\n<!-- vi:title Second -->", Title: "Second"},
 		},
 		{
 			scenario: "date only",
 			in:       "<!-- vi:modified-at 2026-11-09 -->",
-			expected: MarkdownDocument{ModifiedAt: time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)},
+			expected: MarkdownDocument{Intro: "<!-- vi:modified-at 2026-11-09 -->", ModifiedAt: time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)},
 		},
 		{
 			scenario: "invalid date is ignored",
 			in:       "<!-- vi:modified-at yesterday -->\n<!-- vi:title Still parsed -->",
-			expected: MarkdownDocument{Title: "Still parsed"},
+			expected: MarkdownDocument{Intro: "<!-- vi:modified-at yesterday -->\n<!-- vi:title Still parsed -->", Title: "Still parsed"},
 		},
 		{
 			scenario: "invalid date preserves previous value",
 			in:       "<!-- vi:modified-at 2026-11-09 -->\n<!-- vi:modified-at 2026-02-30 -->",
-			expected: MarkdownDocument{ModifiedAt: time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)},
+			expected: MarkdownDocument{Intro: "<!-- vi:modified-at 2026-11-09 -->\n<!-- vi:modified-at 2026-02-30 -->", ModifiedAt: time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)},
 		},
 		{
 			scenario: "unknown keys and ordinary comments",
 			in:       "<!-- A normal comment -->\n<!-- vi:unknown ignored -->\n<!-- title ignored -->",
+			expected: MarkdownDocument{Intro: "<!-- A normal comment -->\n<!-- vi:unknown ignored -->\n<!-- title ignored -->"},
 		},
 		{
 			scenario: "missing values",
 			in:       "<!-- -->\n<!-- vi:title -->\n<!--vi:description-->",
+			expected: MarkdownDocument{Intro: "<!-- -->\n<!-- vi:title -->\n<!--vi:description-->"},
 		},
 		{
 			scenario: "malformed and inline comments",
 			in: "vi:title No comment\n<!-- vi:title Unclosed\nvi:title No opening -->\n" +
 				"Text <!-- vi:title Inline -->\n<!-- vi:title Trailing --> text\n" +
 				"<!-- vi:title First --><!-- vi:title Second -->",
+			expected: MarkdownDocument{Intro: "vi:title No comment\n<!-- vi:title Unclosed\nvi:title No opening -->\n" +
+				"Text <!-- vi:title Inline -->\n<!-- vi:title Trailing --> text\n" +
+				"<!-- vi:title First --><!-- vi:title Second -->"},
 		},
 		{
 			scenario: "multiline comments",
 			in:       "<!--\nvi:title Multiline\n-->\n<!-- vi:description Multiple\nlines -->",
+			expected: MarkdownDocument{Intro: "<!--\nvi:title Multiline\n-->\n<!-- vi:description Multiple\nlines -->"},
 		},
 	}
 
